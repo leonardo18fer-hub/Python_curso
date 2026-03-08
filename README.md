@@ -117,7 +117,7 @@ Não requer instalação. É apenas um arquivo HTML.
 
 **Opção 1 — Abrir localmente:**
 ```bash
-git clone https://github.com/leonardo-fernandes/python-exe.git
+git clone https://github.com/leonardo18fer-hub/python-exe.git
 cd python-exe
 # Abra o arquivo no navegador
 open python-cyberpunk-course.html      # macOS
@@ -127,7 +127,7 @@ start python-cyberpunk-course.html    # Windows
 
 **Opção 2 — GitHub Pages:**
 
-Acesse diretamente em: `https://leonardo-fernandes.github.io/python-exe`
+Acesse diretamente em: `https://leonardo18fer-hub.github.io/python-exe`
 
 **Opção 3 — Download direto:**
 
@@ -209,8 +209,9 @@ Distribuído sob a licença MIT. Veja `LICENSE` para mais informações.
 
 **Leonardo Fernandes**
 
-[![GitHub](https://img.shields.io/badge/GitHub-100000?style=for-the-badge&logo=github&logoColor=white)](https://github.com/leonardo-fernandes)
-[![LinkedIn](https://img.shields.io/badge/LinkedIn-0077B5?style=for-the-badge&logo=linkedin&logoColor=white)](https://linkedin.com/in/leonardo-fernandes)
+[![GitHub](https://img.shields.io/badge/GitHub-100000?style=for-the-badge&logo=github&logoColor=white)](https://github.com/leonardo18fer-hub)
+[![LinkedIn](https://img.shields.io/badge/LinkedIn-0077B5?style=for-the-badge&logo=linkedin&logoColor=white)](https://www.linkedin.com/in/leonardo-f-s-577b54296/)
+[![Gmail](https://img.shields.io/badge/Gmail-D14836?style=for-the-badge&logo=gmail&logoColor=white)](mailto:leonardo18fer@gmail.com)
 
 *"Feito com 🖤 e muito café às 2 da manhã"*
 
