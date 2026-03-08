@@ -1,0 +1,2385 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>PYTH0N.EXE — Curso Neural de Python</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Rajdhani:wght@300;400;500;600;700&family=Orbitron:wght@400;700;900&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --cyan: #00f5ff;
+    --magenta: #ff0090;
+    --yellow: #ffd700;
+    --green: #00ff41;
+    --dark: #020408;
+    --dark2: #060d14;
+    --dark3: #0a1628;
+    --panel: rgba(0,245,255,0.04);
+    --border: rgba(0,245,255,0.2);
+    --text: #a8d8e8;
+    --text-dim: #4a7a8a;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  html { scroll-behavior: smooth; }
+
+  body {
+    background: var(--dark);
+    color: var(--text);
+    font-family: 'Rajdhani', sans-serif;
+    font-size: 16px;
+    overflow-x: hidden;
+    cursor: none;
+  }
+
+  /* Custom Cursor */
+  .cursor {
+    width: 20px; height: 20px;
+    border: 1px solid var(--cyan);
+    border-radius: 50%;
+    position: fixed;
+    pointer-events: none;
+    z-index: 9999;
+    transform: translate(-50%, -50%);
+    transition: all 0.1s ease;
+    mix-blend-mode: screen;
+  }
+  .cursor-dot {
+    width: 4px; height: 4px;
+    background: var(--cyan);
+    border-radius: 50%;
+    position: fixed;
+    pointer-events: none;
+    z-index: 9999;
+    transform: translate(-50%, -50%);
+  }
+  .cursor.clicked { transform: translate(-50%,-50%) scale(2); opacity: 0; }
+
+  /* Scanlines overlay */
+  body::before {
+    content: '';
+    position: fixed;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background: repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(0,0,0,0.08) 2px, rgba(0,0,0,0.08) 4px);
+    pointer-events: none;
+    z-index: 9998;
+  }
+
+  /* Grid background */
+  body::after {
+    content: '';
+    position: fixed;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background-image:
+      linear-gradient(rgba(0,245,255,0.03) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(0,245,255,0.03) 1px, transparent 1px);
+    background-size: 50px 50px;
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  /* ======= NAVBAR ======= */
+  nav {
+    position: fixed;
+    top: 0; left: 0; right: 0;
+    z-index: 1000;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 40px;
+    height: 60px;
+    background: rgba(2,4,8,0.95);
+    border-bottom: 1px solid var(--border);
+    backdrop-filter: blur(10px);
+  }
+
+  .nav-logo {
+    font-family: 'Orbitron', monospace;
+    font-size: 18px;
+    font-weight: 900;
+    color: var(--cyan);
+    text-shadow: 0 0 20px var(--cyan);
+    letter-spacing: 3px;
+    text-decoration: none;
+  }
+  .nav-logo span { color: var(--magenta); }
+
+  .nav-links {
+    display: flex;
+    gap: 6px;
+    list-style: none;
+  }
+  .nav-links a {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 11px;
+    color: var(--text-dim);
+    text-decoration: none;
+    padding: 6px 14px;
+    border: 1px solid transparent;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    transition: all 0.2s;
+  }
+  .nav-links a:hover {
+    color: var(--cyan);
+    border-color: var(--border);
+    background: var(--panel);
+    text-shadow: 0 0 8px var(--cyan);
+  }
+
+  .nav-status {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 10px;
+    color: var(--green);
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+  .status-dot {
+    width: 6px; height: 6px;
+    background: var(--green);
+    border-radius: 50%;
+    animation: blink 1.5s infinite;
+    box-shadow: 0 0 6px var(--green);
+  }
+  @keyframes blink { 0%,100%{opacity:1} 50%{opacity:0.2} }
+
+  /* ======= HERO ======= */
+  #hero {
+    position: relative;
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    overflow: hidden;
+    padding-top: 60px;
+  }
+
+  .hero-bg {
+    position: absolute;
+    inset: 0;
+    background:
+      radial-gradient(ellipse 80% 60% at 50% 40%, rgba(0,245,255,0.06) 0%, transparent 70%),
+      radial-gradient(ellipse 40% 40% at 20% 80%, rgba(255,0,144,0.08) 0%, transparent 60%),
+      radial-gradient(ellipse 40% 40% at 80% 20%, rgba(255,215,0,0.04) 0%, transparent 60%);
+  }
+
+  .city-lines {
+    position: absolute;
+    bottom: 0; left: 0; right: 0;
+    height: 200px;
+    overflow: hidden;
+    opacity: 0.3;
+  }
+
+  .hero-content {
+    position: relative;
+    z-index: 1;
+  }
+
+  .hero-tag {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 11px;
+    color: var(--magenta);
+    letter-spacing: 6px;
+    text-transform: uppercase;
+    margin-bottom: 20px;
+    opacity: 0;
+    animation: fadeUp 0.8s 0.3s forwards;
+  }
+
+  .hero-title {
+    font-family: 'Orbitron', monospace;
+    font-size: clamp(48px, 10vw, 110px);
+    font-weight: 900;
+    line-height: 0.9;
+    margin-bottom: 20px;
+    opacity: 0;
+    animation: fadeUp 0.8s 0.5s forwards;
+  }
+
+  .hero-title .line1 { color: #fff; display: block; }
+  .hero-title .line2 {
+    color: transparent;
+    -webkit-text-stroke: 1px var(--cyan);
+    display: block;
+    text-shadow: none;
+    filter: drop-shadow(0 0 30px var(--cyan));
+  }
+  .hero-title .line3 {
+    color: var(--magenta);
+    display: block;
+    text-shadow: 0 0 40px var(--magenta), 0 0 80px rgba(255,0,144,0.4);
+  }
+
+  .hero-sub {
+    font-size: 18px;
+    color: var(--text-dim);
+    max-width: 600px;
+    margin: 0 auto 40px;
+    font-weight: 300;
+    letter-spacing: 1px;
+    opacity: 0;
+    animation: fadeUp 0.8s 0.7s forwards;
+  }
+
+  .hero-cta {
+    display: inline-flex;
+    align-items: center;
+    gap: 12px;
+    background: transparent;
+    border: 1px solid var(--cyan);
+    color: var(--cyan);
+    font-family: 'Orbitron', monospace;
+    font-size: 13px;
+    font-weight: 700;
+    letter-spacing: 3px;
+    padding: 16px 40px;
+    text-decoration: none;
+    text-transform: uppercase;
+    position: relative;
+    overflow: hidden;
+    transition: all 0.3s;
+    cursor: none;
+    opacity: 0;
+    animation: fadeUp 0.8s 0.9s forwards;
+  }
+  .hero-cta::before {
+    content: '';
+    position: absolute;
+    left: -100%; top: 0; bottom: 0;
+    width: 100%;
+    background: var(--cyan);
+    transition: left 0.3s ease;
+    z-index: -1;
+  }
+  .hero-cta:hover::before { left: 0; }
+  .hero-cta:hover { color: var(--dark); box-shadow: 0 0 40px rgba(0,245,255,0.4); }
+
+  .scroll-indicator {
+    position: absolute;
+    bottom: 30px;
+    left: 50%;
+    transform: translateX(-50%);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 9px;
+    color: var(--text-dim);
+    letter-spacing: 3px;
+    animation: fadeIn 2s 1.5s both;
+  }
+  .scroll-line {
+    width: 1px;
+    height: 40px;
+    background: linear-gradient(to bottom, var(--cyan), transparent);
+    animation: scrollPulse 2s infinite;
+  }
+  @keyframes scrollPulse { 0%,100%{opacity:0.3} 50%{opacity:1} }
+
+  /* ======= STATS BAR ======= */
+  .stats-bar {
+    position: relative;
+    z-index: 1;
+    border-top: 1px solid var(--border);
+    border-bottom: 1px solid var(--border);
+    background: rgba(0,245,255,0.02);
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    overflow: hidden;
+  }
+  .stat-item {
+    padding: 24px 30px;
+    border-right: 1px solid var(--border);
+    text-align: center;
+    position: relative;
+  }
+  .stat-item:last-child { border-right: none; }
+  .stat-num {
+    font-family: 'Orbitron', monospace;
+    font-size: 36px;
+    font-weight: 900;
+    color: var(--cyan);
+    display: block;
+    text-shadow: 0 0 20px rgba(0,245,255,0.5);
+  }
+  .stat-label {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 10px;
+    color: var(--text-dim);
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    margin-top: 4px;
+  }
+
+  /* ======= SECTIONS ======= */
+  section {
+    position: relative;
+    z-index: 1;
+    padding: 80px 40px;
+    max-width: 1200px;
+    margin: 0 auto;
+  }
+
+  .section-header {
+    margin-bottom: 50px;
+  }
+
+  .section-tag {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 10px;
+    color: var(--magenta);
+    letter-spacing: 5px;
+    text-transform: uppercase;
+    margin-bottom: 12px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+  .section-tag::after {
+    content: '';
+    flex: 1;
+    height: 1px;
+    background: linear-gradient(to right, var(--magenta), transparent);
+    max-width: 200px;
+  }
+
+  .section-title {
+    font-family: 'Orbitron', monospace;
+    font-size: clamp(28px, 5vw, 48px);
+    font-weight: 700;
+    color: #fff;
+    line-height: 1.1;
+  }
+  .section-title span { color: var(--cyan); text-shadow: 0 0 20px rgba(0,245,255,0.5); }
+
+  /* ======= MODULES GRID ======= */
+  .modules-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
+    gap: 2px;
+  }
+
+  .module-card {
+    background: var(--panel);
+    border: 1px solid var(--border);
+    padding: 30px;
+    position: relative;
+    overflow: hidden;
+    transition: all 0.3s;
+    cursor: none;
+  }
+  .module-card::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 2px;
+    background: linear-gradient(to right, transparent, var(--cyan), transparent);
+    transform: scaleX(0);
+    transition: transform 0.4s;
+  }
+  .module-card:hover::before { transform: scaleX(1); }
+  .module-card:hover {
+    background: rgba(0,245,255,0.07);
+    border-color: rgba(0,245,255,0.4);
+    transform: translateY(-2px);
+  }
+
+  .module-num {
+    font-family: 'Orbitron', monospace;
+    font-size: 11px;
+    color: var(--text-dim);
+    letter-spacing: 3px;
+    margin-bottom: 12px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .module-num::before {
+    content: '//';
+    color: var(--cyan);
+    opacity: 0.5;
+  }
+
+  .module-title {
+    font-family: 'Orbitron', monospace;
+    font-size: 16px;
+    font-weight: 700;
+    color: #fff;
+    margin-bottom: 12px;
+    line-height: 1.3;
+  }
+
+  .module-desc {
+    font-size: 14px;
+    color: var(--text-dim);
+    line-height: 1.7;
+    margin-bottom: 20px;
+    font-weight: 300;
+  }
+
+  .module-topics {
+    list-style: none;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+  }
+  .module-topics li {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 10px;
+    color: var(--cyan);
+    background: rgba(0,245,255,0.08);
+    border: 1px solid rgba(0,245,255,0.2);
+    padding: 3px 10px;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+  }
+
+  /* ======= CONTENT SECTION ======= */
+  .content-wrapper {
+    display: grid;
+    grid-template-columns: 280px 1fr;
+    gap: 2px;
+    border: 1px solid var(--border);
+    min-height: 600px;
+  }
+
+  .content-sidebar {
+    background: rgba(0,245,255,0.02);
+    border-right: 1px solid var(--border);
+    overflow-y: auto;
+  }
+
+  .sidebar-section-title {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 9px;
+    color: var(--text-dim);
+    letter-spacing: 3px;
+    padding: 16px 20px 8px;
+    text-transform: uppercase;
+    border-bottom: 1px solid rgba(0,245,255,0.1);
+  }
+
+  .sidebar-item {
+    padding: 12px 20px;
+    border-bottom: 1px solid rgba(0,245,255,0.05);
+    cursor: none;
+    transition: all 0.2s;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 12px;
+    color: var(--text-dim);
+  }
+  .sidebar-item:hover, .sidebar-item.active {
+    background: rgba(0,245,255,0.08);
+    color: var(--cyan);
+    border-left: 2px solid var(--cyan);
+  }
+  .sidebar-item.active { color: var(--cyan); }
+  .sidebar-num {
+    color: var(--magenta);
+    font-size: 10px;
+    opacity: 0.7;
+    min-width: 20px;
+  }
+
+  .content-main {
+    padding: 40px;
+    background: var(--dark2);
+  }
+
+  .lesson-title {
+    font-family: 'Orbitron', monospace;
+    font-size: 24px;
+    font-weight: 700;
+    color: #fff;
+    margin-bottom: 8px;
+  }
+  .lesson-meta {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 10px;
+    color: var(--text-dim);
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    margin-bottom: 30px;
+    padding-bottom: 20px;
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    gap: 20px;
+  }
+  .lesson-meta span { color: var(--cyan); }
+
+  .lesson-content {
+    display: none;
+  }
+  .lesson-content.active {
+    display: block;
+    animation: fadeIn 0.4s ease;
+  }
+
+  .lesson-text {
+    font-size: 16px;
+    color: var(--text);
+    line-height: 1.8;
+    margin-bottom: 24px;
+    font-weight: 300;
+  }
+  .lesson-text strong {
+    color: var(--cyan);
+    font-weight: 600;
+  }
+  .lesson-text em {
+    color: var(--magenta);
+    font-style: normal;
+    font-weight: 600;
+  }
+
+  /* Code blocks */
+  .code-block {
+    background: var(--dark);
+    border: 1px solid var(--border);
+    border-left: 3px solid var(--cyan);
+    margin: 24px 0;
+    position: relative;
+    overflow: hidden;
+  }
+  .code-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 10px 16px;
+    background: rgba(0,245,255,0.05);
+    border-bottom: 1px solid var(--border);
+  }
+  .code-lang {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 10px;
+    color: var(--cyan);
+    letter-spacing: 2px;
+    text-transform: uppercase;
+  }
+  .code-copy {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 9px;
+    color: var(--text-dim);
+    background: none;
+    border: 1px solid var(--border);
+    padding: 3px 10px;
+    cursor: none;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    transition: all 0.2s;
+  }
+  .code-copy:hover { color: var(--cyan); border-color: var(--cyan); }
+
+  pre {
+    padding: 20px;
+    overflow-x: auto;
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 13px;
+    line-height: 1.8;
+    color: #c8e6f0;
+  }
+
+  /* Syntax highlighting */
+  .kw { color: #ff79c6; }
+  .fn { color: #50fa7b; }
+  .str { color: #f1fa8c; }
+  .num { color: #bd93f9; }
+  .cm { color: #6272a4; font-style: italic; }
+  .var { color: #8be9fd; }
+  .op { color: #ff79c6; }
+  .cls { color: #ffb86c; }
+
+  /* Info box */
+  .info-box {
+    background: rgba(0,245,255,0.05);
+    border: 1px solid rgba(0,245,255,0.2);
+    padding: 20px 24px;
+    margin: 24px 0;
+    position: relative;
+  }
+  .info-box::before {
+    content: '[ INFO ]';
+    position: absolute;
+    top: -1px; left: 20px;
+    background: var(--dark2);
+    padding: 0 8px;
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 9px;
+    color: var(--cyan);
+    letter-spacing: 2px;
+    transform: translateY(-50%);
+  }
+  .warn-box {
+    background: rgba(255,215,0,0.05);
+    border: 1px solid rgba(255,215,0,0.2);
+    padding: 20px 24px;
+    margin: 24px 0;
+    position: relative;
+  }
+  .warn-box::before {
+    content: '[ AVISO ]';
+    position: absolute;
+    top: -1px; left: 20px;
+    background: var(--dark2);
+    padding: 0 8px;
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 9px;
+    color: var(--yellow);
+    letter-spacing: 2px;
+    transform: translateY(-50%);
+  }
+
+  /* Nav buttons */
+  .lesson-nav {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 40px;
+    padding-top: 20px;
+    border-top: 1px solid var(--border);
+  }
+  .nav-btn {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 11px;
+    color: var(--text-dim);
+    background: none;
+    border: 1px solid var(--border);
+    padding: 10px 20px;
+    cursor: none;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    transition: all 0.2s;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .nav-btn:hover:not(:disabled) {
+    color: var(--cyan);
+    border-color: var(--cyan);
+    background: rgba(0,245,255,0.05);
+  }
+  .nav-btn:disabled { opacity: 0.3; cursor: not-allowed; }
+
+  /* ======= CHEATSHEET ======= */
+  .cheatsheet-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 2px;
+  }
+  .cheat-card {
+    background: var(--panel);
+    border: 1px solid var(--border);
+    padding: 24px;
+    transition: all 0.3s;
+  }
+  .cheat-card:hover {
+    background: rgba(0,245,255,0.06);
+    border-color: rgba(0,245,255,0.35);
+  }
+  .cheat-title {
+    font-family: 'Orbitron', monospace;
+    font-size: 12px;
+    font-weight: 700;
+    color: var(--magenta);
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    margin-bottom: 14px;
+    padding-bottom: 10px;
+    border-bottom: 1px solid rgba(255,0,144,0.2);
+  }
+  .cheat-code {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 12px;
+    color: #c8e6f0;
+    line-height: 2;
+  }
+  .cheat-code .kw { color: #ff79c6; }
+  .cheat-code .str { color: #f1fa8c; }
+  .cheat-code .fn { color: #50fa7b; }
+  .cheat-code .num { color: #bd93f9; }
+  .cheat-code .cm { color: #6272a4; }
+
+  /* ======= FOOTER ======= */
+  footer {
+    position: relative;
+    z-index: 1;
+    border-top: 1px solid var(--border);
+    padding: 30px 40px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    background: rgba(0,245,255,0.01);
+  }
+  .footer-logo {
+    font-family: 'Orbitron', monospace;
+    font-size: 14px;
+    font-weight: 900;
+    color: var(--cyan);
+    text-shadow: 0 0 10px var(--cyan);
+  }
+  .footer-text {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 10px;
+    color: var(--text-dim);
+    letter-spacing: 2px;
+  }
+
+  /* ======= ANIMATIONS ======= */
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(30px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+  @keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+  }
+
+  .reveal {
+    opacity: 0;
+    transform: translateY(20px);
+    transition: opacity 0.6s ease, transform 0.6s ease;
+  }
+  .reveal.visible {
+    opacity: 1;
+    transform: translateY(0);
+  }
+
+  /* Glitch effect */
+  .glitch {
+    position: relative;
+  }
+  .glitch::before, .glitch::after {
+    content: attr(data-text);
+    position: absolute;
+    top: 0; left: 0;
+    width: 100%;
+    height: 100%;
+    font-family: inherit;
+    font-size: inherit;
+    font-weight: inherit;
+  }
+  .glitch::before {
+    color: var(--magenta);
+    animation: glitch1 3s infinite;
+    clip-path: polygon(0 30%, 100% 30%, 100% 50%, 0 50%);
+  }
+  .glitch::after {
+    color: var(--cyan);
+    animation: glitch2 3s infinite;
+    clip-path: polygon(0 60%, 100% 60%, 100% 80%, 0 80%);
+  }
+  @keyframes glitch1 {
+    0%,90%,100% { transform: none; opacity: 0; }
+    91% { transform: translate(-2px, 1px); opacity: 0.8; }
+    93% { transform: translate(2px, -1px); opacity: 0.4; }
+    95% { transform: translate(-1px); opacity: 0.6; }
+  }
+  @keyframes glitch2 {
+    0%,88%,100% { transform: none; opacity: 0; }
+    89% { transform: translate(2px, -2px); opacity: 0.7; }
+    91% { transform: translate(-2px, 1px); opacity: 0.3; }
+    93% { transform: translate(1px); opacity: 0.5; }
+  }
+
+  /* ======= TYPING CURSOR ======= */
+  .typing::after {
+    content: '_';
+    animation: blink 0.8s infinite;
+    color: var(--cyan);
+  }
+
+  /* Terminal Progress */
+  .progress-track {
+    background: rgba(0,0,0,0.5);
+    border: 1px solid var(--border);
+    height: 4px;
+    margin-top: 4px;
+    overflow: hidden;
+  }
+  .progress-fill {
+    height: 100%;
+    background: linear-gradient(to right, var(--cyan), var(--magenta));
+    box-shadow: 0 0 10px var(--cyan);
+    transition: width 0.5s ease;
+  }
+
+  /* ======= HIGHLIGHT LIST ======= */
+  .hl-list {
+    list-style: none;
+    margin: 16px 0;
+  }
+  .hl-list li {
+    padding: 6px 0 6px 24px;
+    position: relative;
+    font-size: 15px;
+    color: var(--text);
+    line-height: 1.6;
+  }
+  .hl-list li::before {
+    content: '▸';
+    position: absolute;
+    left: 0;
+    color: var(--cyan);
+    font-size: 12px;
+  }
+
+  /* Table */
+  .data-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 13px;
+    margin: 20px 0;
+  }
+  .data-table th {
+    background: rgba(0,245,255,0.08);
+    color: var(--cyan);
+    padding: 10px 16px;
+    text-align: left;
+    border: 1px solid var(--border);
+    font-size: 10px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+  }
+  .data-table td {
+    padding: 10px 16px;
+    border: 1px solid rgba(0,245,255,0.08);
+    color: var(--text);
+  }
+  .data-table tr:hover td { background: rgba(0,245,255,0.03); }
+  .data-table .tag { color: var(--magenta); }
+  .data-table .val { color: #50fa7b; }
+
+  /* Responsive */
+  @media (max-width: 768px) {
+    nav { padding: 0 20px; }
+    .nav-links { display: none; }
+    section { padding: 60px 20px; }
+    .content-wrapper { grid-template-columns: 1fr; }
+    .content-sidebar { display: none; }
+    .stats-bar { grid-template-columns: repeat(2, 1fr); }
+    footer { flex-direction: column; gap: 12px; text-align: center; }
+  }
+
+  /* Scrollbar */
+  ::-webkit-scrollbar { width: 4px; height: 4px; }
+  ::-webkit-scrollbar-track { background: var(--dark); }
+  ::-webkit-scrollbar-thumb { background: var(--border); }
+  ::-webkit-scrollbar-thumb:hover { background: var(--cyan); }
+
+</style>
+</head>
+<body>
+
+<div class="cursor" id="cursor"></div>
+<div class="cursor-dot" id="cursorDot"></div>
+
+<!-- NAVBAR -->
+<nav>
+  <a href="#hero" class="nav-logo">PYTH<span>0</span>N.EXE</a>
+  <ul class="nav-links">
+    <li><a href="#modulos">Módulos</a></li>
+    <li><a href="#aulas">Aulas</a></li>
+    <li><a href="#cheatsheet">Cheatsheet</a></li>
+  </ul>
+  <div class="nav-status">
+    <div class="status-dot"></div>
+    SISTEMA ONLINE
+  </div>
+</nav>
+
+<!-- HERO -->
+<div id="hero">
+  <div class="hero-bg"></div>
+  <div class="hero-content">
+    <div class="hero-tag">// INICIALIZANDO PROTOCOLO DE APRENDIZADO v3.12</div>
+    <h1 class="hero-title glitch" data-text="">
+      <span class="line1">CURSO</span>
+      <span class="line2">NEURAL</span>
+      <span class="line3">PYTHON</span>
+    </h1>
+    <p class="hero-sub">
+      Do zero ao profissional. Aprenda a linguagem que alimenta IAs, automatiza sistemas e molda o futuro — em um ambiente imersivo projetado para maximizar sua absorção neural.
+    </p>
+    <a href="#aulas" class="hero-cta">
+      ⬡ INICIAR PROTOCOLO
+    </a>
+  </div>
+  <div class="scroll-indicator">
+    <span>SCROLL</span>
+    <div class="scroll-line"></div>
+  </div>
+</div>
+
+<!-- STATS BAR -->
+<div class="stats-bar reveal">
+  <div class="stat-item">
+    <span class="stat-num" data-target="12">0</span>
+    <div class="stat-label">Módulos</div>
+  </div>
+  <div class="stat-item">
+    <span class="stat-num" data-target="80">0</span>
+    <div class="stat-label">Exemplos de Código</div>
+  </div>
+  <div class="stat-item">
+    <span class="stat-num" data-target="45">0</span>
+    <div class="stat-label">Exercícios</div>
+  </div>
+  <div class="stat-item">
+    <span class="stat-num" data-target="100">0</span>
+    <div class="stat-label">% Gratuito</div>
+  </div>
+</div>
+
+<!-- MODULES SECTION -->
+<section id="modulos">
+  <div class="section-header reveal">
+    <div class="section-tag">ÍNDICE DO CURSO</div>
+    <h2 class="section-title">MÓDULOS DO <span>SISTEMA</span></h2>
+  </div>
+
+  <div class="modules-grid">
+    <div class="module-card reveal" onclick="goToLesson(0)">
+      <div class="module-num">MOD_01</div>
+      <div class="module-title">Fundamentos do Sistema</div>
+      <div class="module-desc">Variáveis, tipos de dados, operadores e a estrutura fundamental do Python.</div>
+      <ul class="module-topics">
+        <li>Variáveis</li><li>Tipos</li><li>Operadores</li><li>Input/Output</li>
+      </ul>
+    </div>
+    <div class="module-card reveal" onclick="goToLesson(4)">
+      <div class="module-num">MOD_02</div>
+      <div class="module-title">Controle de Fluxo</div>
+      <div class="module-desc">Condicionais e loops para controlar a execução do seu programa.</div>
+      <ul class="module-topics">
+        <li>if/elif/else</li><li>for</li><li>while</li><li>break/continue</li>
+      </ul>
+    </div>
+    <div class="module-card reveal" onclick="goToLesson(7)">
+      <div class="module-num">MOD_03</div>
+      <div class="module-title">Funções e Módulos</div>
+      <div class="module-desc">Criação de funções reutilizáveis, escopo, lambdas e organização modular.</div>
+      <ul class="module-topics">
+        <li>def</li><li>return</li><li>lambda</li><li>*args/**kwargs</li>
+      </ul>
+    </div>
+    <div class="module-card reveal" onclick="goToLesson(10)">
+      <div class="module-num">MOD_04</div>
+      <div class="module-title">Estruturas de Dados</div>
+      <div class="module-desc">Listas, tuplas, dicionários e sets — os contêineres de dados do Python.</div>
+      <ul class="module-topics">
+        <li>list</li><li>tuple</li><li>dict</li><li>set</li>
+      </ul>
+    </div>
+    <div class="module-card reveal" onclick="goToLesson(14)">
+      <div class="module-num">MOD_05</div>
+      <div class="module-title">Programação Orientada a Objetos</div>
+      <div class="module-desc">Classes, herança, encapsulamento e polimorfismo em Python.</div>
+      <ul class="module-topics">
+        <li>class</li><li>herança</li><li>métodos</li><li>dunder</li>
+      </ul>
+    </div>
+    <div class="module-card reveal" onclick="goToLesson(18)">
+      <div class="module-num">MOD_06</div>
+      <div class="module-title">Tratamento de Erros</div>
+      <div class="module-desc">Exceções, try/except, e como criar código robusto e à prova de falhas.</div>
+      <ul class="module-topics">
+        <li>try/except</li><li>raise</li><li>finally</li><li>custom exceptions</li>
+      </ul>
+    </div>
+    <div class="module-card reveal" onclick="goToLesson(21)">
+      <div class="module-num">MOD_07</div>
+      <div class="module-title">Arquivos e I/O</div>
+      <div class="module-desc">Leitura e escrita de arquivos, JSON, CSV e manipulação de dados externos.</div>
+      <ul class="module-topics">
+        <li>open()</li><li>JSON</li><li>CSV</li><li>Path</li>
+      </ul>
+    </div>
+    <div class="module-card reveal" onclick="goToLesson(24)">
+      <div class="module-num">MOD_08</div>
+      <div class="module-title">Compreensões e Generators</div>
+      <div class="module-desc">List comprehensions, dict comprehensions, generators e expressões funcionais.</div>
+      <ul class="module-topics">
+        <li>list comp</li><li>dict comp</li><li>yield</li><li>map/filter</li>
+      </ul>
+    </div>
+    <div class="module-card reveal" onclick="goToLesson(27)">
+      <div class="module-num">MOD_09</div>
+      <div class="module-title">Decorators e Closures</div>
+      <div class="module-desc">Funções de ordem superior, decorators e o poder da programação funcional.</div>
+      <ul class="module-topics">
+        <li>@decorator</li><li>closure</li><li>functools</li><li>wraps</li>
+      </ul>
+    </div>
+    <div class="module-card reveal" onclick="goToLesson(30)">
+      <div class="module-num">MOD_10</div>
+      <div class="module-title">Módulos Essenciais</div>
+      <div class="module-desc">Biblioteca padrão: datetime, os, sys, random, math e muito mais.</div>
+      <ul class="module-topics">
+        <li>datetime</li><li>os/sys</li><li>random</li><li>math</li>
+      </ul>
+    </div>
+    <div class="module-card reveal" onclick="goToLesson(33)">
+      <div class="module-num">MOD_11</div>
+      <div class="module-title">Concorrência</div>
+      <div class="module-desc">Threads, multiprocessing, async/await e programação concorrente em Python.</div>
+      <ul class="module-topics">
+        <li>threading</li><li>asyncio</li><li>await</li><li>concurrent</li>
+      </ul>
+    </div>
+    <div class="module-card reveal" onclick="goToLesson(36)">
+      <div class="module-num">MOD_12</div>
+      <div class="module-title">Projetos Práticos</div>
+      <div class="module-desc">Consolide o aprendizado com projetos reais: API, automação, web scraping.</div>
+      <ul class="module-topics">
+        <li>requests</li><li>API REST</li><li>scraping</li><li>CLI</li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<!-- AULAS SECTION -->
+<section id="aulas" style="max-width:1200px;margin:0 auto;padding:80px 40px;">
+  <div class="section-header reveal">
+    <div class="section-tag">INTERFACE DE APRENDIZADO</div>
+    <h2 class="section-title">TERMINAL DE <span>AULAS</span></h2>
+  </div>
+
+  <div class="content-wrapper reveal">
+    <!-- Sidebar -->
+    <div class="content-sidebar" id="sidebar"></div>
+
+    <!-- Main Content -->
+    <div class="content-main">
+      <div id="lesson-display"></div>
+    </div>
+  </div>
+</section>
+
+<!-- CHEATSHEET SECTION -->
+<section id="cheatsheet">
+  <div class="section-header reveal">
+    <div class="section-tag">REFERÊNCIA RÁPIDA</div>
+    <h2 class="section-title">CHEAT<span>SHEET</span></h2>
+  </div>
+  <div class="cheatsheet-grid reveal">
+
+    <div class="cheat-card">
+      <div class="cheat-title">Tipos de Dados</div>
+      <div class="cheat-code">
+        <span class="kw">int</span>: x = <span class="num">42</span><br>
+        <span class="kw">float</span>: y = <span class="num">3.14</span><br>
+        <span class="kw">str</span>: s = <span class="str">"texto"</span><br>
+        <span class="kw">bool</span>: b = <span class="kw">True</span><br>
+        <span class="kw">list</span>: l = [<span class="num">1</span>, <span class="num">2</span>, <span class="num">3</span>]<br>
+        <span class="kw">dict</span>: d = {<span class="str">"k"</span>: <span class="str">"v"</span>}<br>
+        <span class="kw">tuple</span>: t = (<span class="num">1</span>, <span class="num">2</span>)<br>
+        <span class="kw">set</span>: s = {<span class="num">1</span>, <span class="num">2</span>, <span class="num">3</span>}
+      </div>
+    </div>
+
+    <div class="cheat-card">
+      <div class="cheat-title">Controle de Fluxo</div>
+      <div class="cheat-code">
+        <span class="kw">if</span> x &gt; <span class="num">0</span>:<br>
+        &nbsp;&nbsp;&nbsp;&nbsp;<span class="fn">print</span>(<span class="str">"positivo"</span>)<br>
+        <span class="kw">elif</span> x == <span class="num">0</span>:<br>
+        &nbsp;&nbsp;&nbsp;&nbsp;<span class="fn">print</span>(<span class="str">"zero"</span>)<br>
+        <span class="kw">else</span>:<br>
+        &nbsp;&nbsp;&nbsp;&nbsp;<span class="fn">print</span>(<span class="str">"negativo"</span>)<br><br>
+        <span class="kw">for</span> i <span class="kw">in</span> <span class="fn">range</span>(<span class="num">10</span>):<br>
+        &nbsp;&nbsp;&nbsp;&nbsp;<span class="fn">print</span>(i)
+      </div>
+    </div>
+
+    <div class="cheat-card">
+      <div class="cheat-title">Funções</div>
+      <div class="cheat-code">
+        <span class="kw">def</span> <span class="fn">somar</span>(a, b):<br>
+        &nbsp;&nbsp;&nbsp;&nbsp;<span class="kw">return</span> a + b<br><br>
+        <span class="cm"># Lambda</span><br>
+        dobro = <span class="kw">lambda</span> x: x * <span class="num">2</span><br><br>
+        <span class="cm"># *args e **kwargs</span><br>
+        <span class="kw">def</span> <span class="fn">f</span>(*args, **kwargs):<br>
+        &nbsp;&nbsp;&nbsp;&nbsp;<span class="kw">pass</span>
+      </div>
+    </div>
+
+    <div class="cheat-card">
+      <div class="cheat-title">List Comprehension</div>
+      <div class="cheat-code">
+        <span class="cm"># Básico</span><br>
+        quadrados = [x**<span class="num">2</span> <span class="kw">for</span> x <span class="kw">in</span> <span class="fn">range</span>(<span class="num">10</span>)]<br><br>
+        <span class="cm"># Com filtro</span><br>
+        pares = [x <span class="kw">for</span> x <span class="kw">in</span> <span class="fn">range</span>(<span class="num">20</span>) <span class="kw">if</span> x%<span class="num">2</span>==<span class="num">0</span>]<br><br>
+        <span class="cm"># Dict comprehension</span><br>
+        d = {k: v <span class="kw">for</span> k, v <span class="kw">in</span> items}
+      </div>
+    </div>
+
+    <div class="cheat-card">
+      <div class="cheat-title">Tratamento de Erros</div>
+      <div class="cheat-code">
+        <span class="kw">try</span>:<br>
+        &nbsp;&nbsp;&nbsp;&nbsp;resultado = <span class="num">10</span> / <span class="num">0</span><br>
+        <span class="kw">except</span> <span class="cls">ZeroDivisionError</span> <span class="kw">as</span> e:<br>
+        &nbsp;&nbsp;&nbsp;&nbsp;<span class="fn">print</span>(<span class="fn">f</span><span class="str">"Erro: {e}"</span>)<br>
+        <span class="kw">except</span> <span class="cls">Exception</span> <span class="kw">as</span> e:<br>
+        &nbsp;&nbsp;&nbsp;&nbsp;<span class="fn">print</span>(<span class="fn">f</span><span class="str">"Geral: {e}"</span>)<br>
+        <span class="kw">finally</span>:<br>
+        &nbsp;&nbsp;&nbsp;&nbsp;<span class="fn">print</span>(<span class="str">"sempre executa"</span>)
+      </div>
+    </div>
+
+    <div class="cheat-card">
+      <div class="cheat-title">Classes (POO)</div>
+      <div class="cheat-code">
+        <span class="kw">class</span> <span class="cls">Animal</span>:<br>
+        &nbsp;&nbsp;&nbsp;&nbsp;<span class="kw">def</span> <span class="fn">__init__</span>(self, nome):<br>
+        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;self.nome = nome<br>
+        &nbsp;&nbsp;&nbsp;&nbsp;<span class="kw">def</span> <span class="fn">falar</span>(self):<br>
+        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="kw">pass</span><br><br>
+        <span class="kw">class</span> <span class="cls">Cão</span>(<span class="cls">Animal</span>):<br>
+        &nbsp;&nbsp;&nbsp;&nbsp;<span class="kw">def</span> <span class="fn">falar</span>(self):<br>
+        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="kw">return</span> <span class="str">"Au!"</span>
+      </div>
+    </div>
+
+    <div class="cheat-card">
+      <div class="cheat-title">Arquivos</div>
+      <div class="cheat-code">
+        <span class="cm"># Ler arquivo</span><br>
+        <span class="kw">with</span> <span class="fn">open</span>(<span class="str">"f.txt"</span>, <span class="str">"r"</span>) <span class="kw">as</span> f:<br>
+        &nbsp;&nbsp;&nbsp;&nbsp;conteudo = f.<span class="fn">read</span>()<br><br>
+        <span class="cm"># Escrever</span><br>
+        <span class="kw">with</span> <span class="fn">open</span>(<span class="str">"f.txt"</span>, <span class="str">"w"</span>) <span class="kw">as</span> f:<br>
+        &nbsp;&nbsp;&nbsp;&nbsp;f.<span class="fn">write</span>(<span class="str">"dados"</span>)<br><br>
+        <span class="cm"># JSON</span><br>
+        <span class="kw">import</span> json<br>
+        json.<span class="fn">dump</span>(dados, f)
+      </div>
+    </div>
+
+    <div class="cheat-card">
+      <div class="cheat-title">Strings Úteis</div>
+      <div class="cheat-code">
+        s = <span class="str">"Python"</span><br>
+        s.<span class="fn">upper</span>()&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="cm"># PYTHON</span><br>
+        s.<span class="fn">lower</span>()&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="cm"># python</span><br>
+        s.<span class="fn">split</span>(<span class="str">","</span>)&nbsp;&nbsp;&nbsp;<span class="cm"># lista</span><br>
+        s.<span class="fn">strip</span>()&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="cm"># sem espaços</span><br>
+        s.<span class="fn">replace</span>(<span class="str">"a"</span>,<span class="str">"b"</span>)<br>
+        <span class="fn">f</span><span class="str">"{s} tem {<span class="fn">len</span>(s)} chars"</span><br>
+        <span class="str">","</span>.<span class="fn">join</span>([<span class="str">"a"</span>,<span class="str">"b"</span>])
+      </div>
+    </div>
+
+    <div class="cheat-card">
+      <div class="cheat-title">Decorators</div>
+      <div class="cheat-code">
+        <span class="kw">def</span> <span class="fn">meu_decorator</span>(func):<br>
+        &nbsp;&nbsp;&nbsp;&nbsp;<span class="kw">def</span> <span class="fn">wrapper</span>(*args):<br>
+        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="fn">print</span>(<span class="str">"antes"</span>)<br>
+        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;func(*args)<br>
+        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="fn">print</span>(<span class="str">"depois"</span>)<br>
+        &nbsp;&nbsp;&nbsp;&nbsp;<span class="kw">return</span> wrapper<br><br>
+        <span class="kw">@</span><span class="fn">meu_decorator</span><br>
+        <span class="kw">def</span> <span class="fn">saudacao</span>(): ...
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer>
+  <div class="footer-logo">PYTH0N.EXE</div>
+  <div class="footer-text">// SISTEMA DE APRENDIZADO NEURAL — 2024 — ALL RIGHTS BELONG TO THE MACHINE</div>
+  <div class="footer-text">v3.12.0</div>
+</footer>
+
+<script>
+// ============ CURSOR ============
+const cursor = document.getElementById('cursor');
+const cursorDot = document.getElementById('cursorDot');
+document.addEventListener('mousemove', e => {
+  cursor.style.left = e.clientX + 'px';
+  cursor.style.top = e.clientY + 'px';
+  cursorDot.style.left = e.clientX + 'px';
+  cursorDot.style.top = e.clientY + 'px';
+});
+document.addEventListener('click', () => {
+  cursor.classList.add('clicked');
+  setTimeout(() => cursor.classList.remove('clicked'), 300);
+});
+
+// ============ SCROLL REVEAL ============
+const observer = new IntersectionObserver(entries => {
+  entries.forEach(e => {
+    if (e.isIntersecting) {
+      e.target.classList.add('visible');
+      // Counter animation for stats
+      const nums = e.target.querySelectorAll('[data-target]');
+      nums.forEach(el => animateCounter(el));
+    }
+  });
+}, { threshold: 0.1 });
+
+document.querySelectorAll('.reveal').forEach(el => observer.observe(el));
+
+function animateCounter(el) {
+  const target = parseInt(el.dataset.target);
+  let current = 0;
+  const step = target / 40;
+  const timer = setInterval(() => {
+    current += step;
+    if (current >= target) { el.textContent = target + (target === 100 ? '' : '+'); clearInterval(timer); }
+    else el.textContent = Math.floor(current);
+  }, 30);
+}
+
+// ============ LESSONS DATA ============
+const lessons = [
+  // MOD 01 - Fundamentos
+  {
+    mod: "MOD_01", title: "Variáveis e Tipos de Dados",
+    difficulty: "BÁSICO", time: "15 MIN",
+    content: `
+      <p class="lesson-text">Em Python, <strong>variáveis</strong> são containers para armazenar dados. Ao contrário de outras linguagens, você não precisa declarar o tipo — Python é <em>dinamicamente tipado</em>.</p>
+      <div class="code-block"><div class="code-header"><span class="code-lang">PYTHON</span><button class="code-copy" onclick="copyCode(this)">COPIAR</button></div><pre><span class="cm"># Criando variáveis</span>
+<span class="var">nome</span> = <span class="str">"Replicante"</span>       <span class="cm"># str</span>
+<span class="var">velocidade</span> = <span class="num">299</span>         <span class="cm"># int</span>
+<span class="var">temperatura</span> = <span class="num">36.6</span>      <span class="cm"># float</span>
+<span class="var">ativo</span> = <span class="kw">True</span>             <span class="cm"># bool</span>
+<span class="var">vazio</span> = <span class="kw">None</span>             <span class="cm"># NoneType</span>
+
+<span class="cm"># Verificar tipo</span>
+<span class="fn">print</span>(<span class="fn">type</span>(<span class="var">nome</span>))       <span class="cm"># &lt;class 'str'&gt;</span>
+<span class="fn">print</span>(<span class="fn">type</span>(<span class="var">velocidade</span>))  <span class="cm"># &lt;class 'int'&gt;</span></pre></div>
+      <div class="info-box"><p class="lesson-text" style="margin:0"><strong>Convenção:</strong> Use snake_case para variáveis em Python. Ex: <strong>minha_variavel</strong>, não ~~minhaVariavel~~.</p></div>
+      <p class="lesson-text">Python permite <strong>atribuição múltipla</strong> e <strong>troca de valores</strong> de forma elegante:</p>
+      <div class="code-block"><div class="code-header"><span class="code-lang">PYTHON</span><button class="code-copy" onclick="copyCode(this)">COPIAR</button></div><pre><span class="cm"># Atribuição múltipla</span>
+<span class="var">x</span>, <span class="var">y</span>, <span class="var">z</span> = <span class="num">1</span>, <span class="num">2</span>, <span class="num">3</span>
+
+<span class="cm"># Troca elegante (sem variável temporária!)</span>
+<span class="var">x</span>, <span class="var">y</span> = <span class="var">y</span>, <span class="var">x</span>
+
+<span class="cm"># Mesma variável para múltiplos</span>
+<span class="var">a</span> = <span class="var">b</span> = <span class="var">c</span> = <span class="num">0</span>
+
+<span class="cm"># Constantes (convenção: MAIÚSCULAS)</span>
+<span class="var">MAX_VELOCIDADE</span> = <span class="num">299792458</span></pre></div>`
+  },
+  {
+    mod: "MOD_01", title: "Operadores",
+    difficulty: "BÁSICO", time: "10 MIN",
+    content: `
+      <p class="lesson-text">Python possui operadores para <strong>aritmética</strong>, <strong>comparação</strong>, <strong>lógica</strong> e <strong>atribuição</strong>.</p>
+      <table class="data-table">
+        <tr><th>Operador</th><th>Descrição</th><th>Exemplo</th></tr>
+        <tr><td class="tag">+</td><td>Adição</td><td class="val">5 + 3 = 8</td></tr>
+        <tr><td class="tag">-</td><td>Subtração</td><td class="val">5 - 3 = 2</td></tr>
+        <tr><td class="tag">*</td><td>Multiplicação</td><td class="val">5 * 3 = 15</td></tr>
+        <tr><td class="tag">/</td><td>Divisão (float)</td><td class="val">5 / 2 = 2.5</td></tr>
+        <tr><td class="tag">//</td><td>Divisão inteira</td><td class="val">5 // 2 = 2</td></tr>
+        <tr><td class="tag">%</td><td>Módulo (resto)</td><td class="val">5 % 2 = 1</td></tr>
+        <tr><td class="tag">**</td><td>Potência</td><td class="val">2 ** 8 = 256</td></tr>
+      </table>
+      <div class="code-block"><div class="code-header"><span class="code-lang">PYTHON</span><button class="code-copy" onclick="copyCode(this)">COPIAR</button></div><pre><span class="cm"># Aritméticos</span>
+<span class="fn">print</span>(<span class="num">10</span> + <span class="num">3</span>)   <span class="cm"># 13</span>
+<span class="fn">print</span>(<span class="num">10</span> // <span class="num">3</span>)  <span class="cm"># 3  (divisão inteira)</span>
+<span class="fn">print</span>(<span class="num">10</span> % <span class="num">3</span>)   <span class="cm"># 1  (resto)</span>
+<span class="fn">print</span>(<span class="num">2</span> ** <span class="num">10</span>)  <span class="cm"># 1024</span>
+
+<span class="cm"># Lógicos</span>
+<span class="fn">print</span>(<span class="kw">True</span> <span class="kw">and</span> <span class="kw">False</span>)  <span class="cm"># False</span>
+<span class="fn">print</span>(<span class="kw">True</span> <span class="kw">or</span> <span class="kw">False</span>)   <span class="cm"># True</span>
+<span class="fn">print</span>(<span class="kw">not</span> <span class="kw">True</span>)        <span class="cm"># False</span>
+
+<span class="cm"># Comparação</span>
+<span class="fn">print</span>(<span class="num">5</span> == <span class="num">5</span>)   <span class="cm"># True</span>
+<span class="fn">print</span>(<span class="num">5</span> != <span class="num">3</span>)   <span class="cm"># True</span>
+<span class="fn">print</span>(<span class="num">5</span> &gt;= <span class="num">3</span>)   <span class="cm"># True</span></pre></div>`
+  },
+  {
+    mod: "MOD_01", title: "Strings em Detalhes",
+    difficulty: "BÁSICO", time: "20 MIN",
+    content: `
+      <p class="lesson-text">Strings são sequências de caracteres imutáveis. Python oferece um arsenal poderoso para manipulá-las.</p>
+      <div class="code-block"><div class="code-header"><span class="code-lang">PYTHON</span><button class="code-copy" onclick="copyCode(this)">COPIAR</button></div><pre><span class="cm"># Criação</span>
+<span class="var">s1</span> = <span class="str">'aspas simples'</span>
+<span class="var">s2</span> = <span class="str">"aspas duplas"</span>
+<span class="var">s3</span> = <span class="str">"""
+  multi
+  linha
+"""</span>
+
+<span class="cm"># Indexação e fatiamento</span>
+<span class="var">nome</span> = <span class="str">"NEXUS-6"</span>
+<span class="fn">print</span>(<span class="var">nome</span>[<span class="num">0</span>])     <span class="cm"># N</span>
+<span class="fn">print</span>(<span class="var">nome</span>[-<span class="num">1</span>])    <span class="cm"># 6</span>
+<span class="fn">print</span>(<span class="var">nome</span>[<span class="num">0</span>:<span class="num">5</span>])   <span class="cm"># NEXUS</span>
+<span class="fn">print</span>(<span class="var">nome</span>[::-<span class="num">1</span>])  <span class="cm"># 6-SUXEN (invertido)</span>
+
+<span class="cm"># f-strings (Python 3.6+)</span>
+<span class="var">modelo</span> = <span class="str">"Roy Batty"</span>
+<span class="var">ano</span> = <span class="num">2049</span>
+<span class="fn">print</span>(<span class="fn">f</span><span class="str">"Replicante {modelo}, ano {ano}"</span>)
+<span class="fn">print</span>(<span class="fn">f</span><span class="str">"PI = {<span class="num">3.14159</span>:.2f}"</span>)  <span class="cm"># PI = 3.14</span></pre></div>
+      <div class="warn-box"><p class="lesson-text" style="margin:0">Strings são <em>imutáveis</em>! Você não pode fazer <strong>s[0] = "X"</strong>. Para modificar, crie uma nova string.</p></div>
+      <div class="code-block"><div class="code-header"><span class="code-lang">PYTHON</span><button class="code-copy" onclick="copyCode(this)">COPIAR</button></div><pre><span class="cm"># Métodos essenciais</span>
+<span class="var">s</span> = <span class="str">"  Blade Runner  "</span>
+<span class="fn">print</span>(<span class="var">s</span>.<span class="fn">strip</span>())          <span class="cm"># "Blade Runner"</span>
+<span class="fn">print</span>(<span class="var">s</span>.<span class="fn">upper</span>())          <span class="cm"># "  BLADE RUNNER  "</span>
+<span class="fn">print</span>(<span class="var">s</span>.<span class="fn">replace</span>(<span class="str">"Runner"</span>, <span class="str">"2049"</span>))<br>
+<span class="fn">print</span>(<span class="str">","</span>.<span class="fn">join</span>([<span class="str">"a"</span>, <span class="str">"b"</span>, <span class="str">"c"</span>]))  <span class="cm"># a,b,c</span>
+<span class="fn">print</span>(<span class="str">"Blade"</span> <span class="kw">in</span> <span class="var">s</span>)       <span class="cm"># True</span>
+<span class="fn">print</span>(<span class="var">s</span>.<span class="fn">count</span>(<span class="str">"l"</span>))       <span class="cm"># 1</span></pre></div>`
+  },
+  {
+    mod: "MOD_01", title: "Input e Output",
+    difficulty: "BÁSICO", time: "8 MIN",
+    content: `
+      <p class="lesson-text">A comunicação básica com o usuário é feita com <strong>print()</strong> e <strong>input()</strong>.</p>
+      <div class="code-block"><div class="code-header"><span class="code-lang">PYTHON</span><button class="code-copy" onclick="copyCode(this)">COPIAR</button></div><pre><span class="cm"># print() avançado</span>
+<span class="fn">print</span>(<span class="str">"Iniciando"</span>, <span class="str">"Sistema"</span>, sep=<span class="str">"_"</span>)
+<span class="cm"># Iniciando_Sistema</span>
+
+<span class="fn">print</span>(<span class="str">"Carregando"</span>, end=<span class="str">"..."</span>)
+<span class="fn">print</span>(<span class="str">"OK"</span>)
+<span class="cm"># Carregando...OK</span>
+
+<span class="cm"># input() sempre retorna string</span>
+<span class="var">nome</span> = <span class="fn">input</span>(<span class="str">"Identificação: "</span>)
+<span class="var">idade</span> = <span class="fn">int</span>(<span class="fn">input</span>(<span class="str">"Ciclos de vida: "</span>))
+
+<span class="cm"># Conversão de tipos</span>
+<span class="var">numero</span> = <span class="fn">int</span>(<span class="str">"42"</span>)
+<span class="var">decimal</span> = <span class="fn">float</span>(<span class="str">"3.14"</span>)
+<span class="var">texto</span> = <span class="fn">str</span>(<span class="num">100</span>)
+<span class="var">logico</span> = <span class="fn">bool</span>(<span class="num">0</span>)   <span class="cm"># False</span></pre></div>`
+  },
+  // MOD 02 - Controle de Fluxo
+  {
+    mod: "MOD_02", title: "Condicionais (if/elif/else)",
+    difficulty: "BÁSICO", time: "15 MIN",
+    content: `
+      <p class="lesson-text">Condicionais permitem que seu código tome <strong>decisões</strong>. Python usa indentação (4 espaços) para definir blocos.</p>
+      <div class="code-block"><div class="code-header"><span class="code-lang">PYTHON</span><button class="code-copy" onclick="copyCode(this)">COPIAR</button></div><pre><span class="var">status</span> = <span class="str">"replicante"</span>
+<span class="var">anos_restantes</span> = <span class="num">2</span>
+
+<span class="kw">if</span> <span class="var">status</span> == <span class="str">"humano"</span>:
+    <span class="fn">print</span>(<span class="str">"Cidadão liberado"</span>)
+<span class="kw">elif</span> <span class="var">anos_restantes</span> > <span class="num">0</span>:
+    <span class="fn">print</span>(<span class="str">"Replicante ativo"</span>)
+<span class="kw">elif</span> <span class="var">anos_restantes</span> == <span class="num">0</span>:
+    <span class="fn">print</span>(<span class="str">"Expirado"</span>)
+<span class="kw">else</span>:
+    <span class="fn">print</span>(<span class="str">"Dado inválido"</span>)
+
+<span class="cm"># Operador ternário</span>
+<span class="var">tipo</span> = <span class="str">"replicante"</span> <span class="kw">if</span> <span class="var">status</span> != <span class="str">"humano"</span> <span class="kw">else</span> <span class="str">"humano"</span>
+
+<span class="cm"># Múltiplas condições</span>
+<span class="kw">if</span> <span class="var">anos_restantes</span> > <span class="num">0</span> <span class="kw">and</span> <span class="var">status</span> == <span class="str">"replicante"</span>:
+    <span class="fn">print</span>(<span class="str">"Fugitivo ativo!"</span>)
+
+<span class="cm"># Verificação de coleções</span>
+<span class="var">lista</span> = [<span class="num">1</span>, <span class="num">2</span>, <span class="num">3</span>]
+<span class="kw">if</span> <span class="var">lista</span>:  <span class="cm"># True se não vazia</span>
+    <span class="fn">print</span>(<span class="str">"Lista com dados"</span>)</pre></div>`
+  },
+  {
+    mod: "MOD_02", title: "Loop FOR",
+    difficulty: "BÁSICO", time: "18 MIN",
+    content: `
+      <p class="lesson-text">O loop <strong>for</strong> itera sobre qualquer objeto iterável: listas, strings, ranges, dicionários...</p>
+      <div class="code-block"><div class="code-header"><span class="code-lang">PYTHON</span><button class="code-copy" onclick="copyCode(this)">COPIAR</button></div><pre><span class="cm"># range() — gera sequência de números</span>
+<span class="kw">for</span> <span class="var">i</span> <span class="kw">in</span> <span class="fn">range</span>(<span class="num">5</span>):      <span class="cm"># 0,1,2,3,4</span>
+    <span class="fn">print</span>(<span class="var">i</span>)
+
+<span class="kw">for</span> <span class="var">i</span> <span class="kw">in</span> <span class="fn">range</span>(<span class="num">2</span>, <span class="num">10</span>, <span class="num">2</span>):  <span class="cm"># 2,4,6,8</span>
+    <span class="fn">print</span>(<span class="var">i</span>)
+
+<span class="cm"># enumerate() — índice + valor</span>
+<span class="var">cidades</span> = [<span class="str">"Neo-Tokyo"</span>, <span class="str">"Megacity"</span>, <span class="str">"Zion"</span>]
+<span class="kw">for</span> <span class="var">i</span>, <span class="var">cidade</span> <span class="kw">in</span> <span class="fn">enumerate</span>(<span class="var">cidades</span>):
+    <span class="fn">print</span>(<span class="fn">f</span><span class="str">"{i}: {cidade}"</span>)
+
+<span class="cm"># zip() — itera múltiplas listas juntas</span>
+<span class="var">nomes</span> = [<span class="str">"Roy"</span>, <span class="str">"Pris"</span>, <span class="str">"Leon"</span>]
+<span class="var">modelos</span> = [<span class="str">"Nexus-6"</span>, <span class="str">"Nexus-6"</span>, <span class="str">"Nexus-6"</span>]
+<span class="kw">for</span> <span class="var">nome</span>, <span class="var">modelo</span> <span class="kw">in</span> <span class="fn">zip</span>(<span class="var">nomes</span>, <span class="var">modelos</span>):
+    <span class="fn">print</span>(<span class="fn">f</span><span class="str">"{nome} — {modelo}"</span>)
+
+<span class="cm"># Iterando dicionário</span>
+<span class="var">replicante</span> = {<span class="str">"nome"</span>: <span class="str">"Roy"</span>, <span class="str">"modelo"</span>: <span class="str">"N6"</span>}
+<span class="kw">for</span> <span class="var">chave</span>, <span class="var">valor</span> <span class="kw">in</span> <span class="var">replicante</span>.<span class="fn">items</span>():
+    <span class="fn">print</span>(<span class="fn">f</span><span class="str">"{chave}: {valor}"</span>)</pre></div>`
+  },
+  {
+    mod: "MOD_02", title: "Loop WHILE e Controle",
+    difficulty: "BÁSICO", time: "15 MIN",
+    content: `
+      <p class="lesson-text">O <strong>while</strong> executa enquanto uma condição for verdadeira. Use <strong>break</strong> e <strong>continue</strong> para controle fino.</p>
+      <div class="code-block"><div class="code-header"><span class="code-lang">PYTHON</span><button class="code-copy" onclick="copyCode(this)">COPIAR</button></div><pre><span class="cm"># while básico</span>
+<span class="var">contador</span> = <span class="num">0</span>
+<span class="kw">while</span> <span class="var">contador</span> < <span class="num">5</span>:
+    <span class="fn">print</span>(<span class="var">contador</span>)
+    <span class="var">contador</span> += <span class="num">1</span>
+
+<span class="cm"># break — interrompe o loop</span>
+<span class="kw">for</span> <span class="var">n</span> <span class="kw">in</span> <span class="fn">range</span>(<span class="num">100</span>):
+    <span class="kw">if</span> <span class="var">n</span> == <span class="num">7</span>:
+        <span class="kw">break</span>  <span class="cm"># Para ao encontrar 7</span>
+    <span class="fn">print</span>(<span class="var">n</span>)
+
+<span class="cm"># continue — pula iteração</span>
+<span class="kw">for</span> <span class="var">n</span> <span class="kw">in</span> <span class="fn">range</span>(<span class="num">10</span>):
+    <span class="kw">if</span> <span class="var">n</span> % <span class="num">2</span> == <span class="num">0</span>:
+        <span class="kw">continue</span>  <span class="cm"># Pula pares</span>
+    <span class="fn">print</span>(<span class="var">n</span>)  <span class="cm"># Só ímpares</span>
+
+<span class="cm"># else no loop — executa se não houve break</span>
+<span class="kw">for</span> <span class="var">n</span> <span class="kw">in</span> <span class="fn">range</span>(<span class="num">5</span>):
+    <span class="fn">print</span>(<span class="var">n</span>)
+<span class="kw">else</span>:
+    <span class="fn">print</span>(<span class="str">"Loop concluído!"</span>)</pre></div>
+      <div class="info-box"><p class="lesson-text" style="margin:0">Use <strong>while True</strong> com <strong>break</strong> para criar loops que rodam indefinidamente até uma condição ser atendida — útil para menus e GUIs.</p></div>`
+  },
+  // MOD 03 - Funções
+  {
+    mod: "MOD_03", title: "Funções Básicas",
+    difficulty: "INTERMEDIÁRIO", time: "20 MIN",
+    content: `
+      <p class="lesson-text">Funções são blocos de código reutilizáveis. Em Python, usamos <strong>def</strong> para definir e <strong>return</strong> para retornar valores.</p>
+      <div class="code-block"><div class="code-header"><span class="code-lang">PYTHON</span><button class="code-copy" onclick="copyCode(this)">COPIAR</button></div><pre><span class="cm"># Função simples</span>
+<span class="kw">def</span> <span class="fn">saudar</span>(<span class="var">nome</span>):
+    <span class="kw">return</span> <span class="fn">f</span><span class="str">"Identificação: {nome}"</span>
+
+<span class="fn">print</span>(<span class="fn">saudar</span>(<span class="str">"Roy Batty"</span>))
+
+<span class="cm"># Parâmetros com valor padrão</span>
+<span class="kw">def</span> <span class="fn">conectar</span>(<span class="var">host</span>, <span class="var">porta</span>=<span class="num">8080</span>, <span class="var">seguro</span>=<span class="kw">True</span>):
+    <span class="var">protocolo</span> = <span class="str">"https"</span> <span class="kw">if</span> <span class="var">seguro</span> <span class="kw">else</span> <span class="str">"http"</span>
+    <span class="kw">return</span> <span class="fn">f</span><span class="str">"{protocolo}://{host}:{porta}"</span>
+
+<span class="fn">print</span>(<span class="fn">conectar</span>(<span class="str">"matrix.net"</span>))
+<span class="fn">print</span>(<span class="fn">conectar</span>(<span class="str">"skynet.ai"</span>, <span class="num">443</span>, <span class="kw">True</span>))
+
+<span class="cm"># Múltiplos retornos (retorna tuple)</span>
+<span class="kw">def</span> <span class="fn">minmax</span>(<span class="var">lista</span>):
+    <span class="kw">return</span> <span class="fn">min</span>(<span class="var">lista</span>), <span class="fn">max</span>(<span class="var">lista</span>)
+
+<span class="var">menor</span>, <span class="var">maior</span> = <span class="fn">minmax</span>([<span class="num">3</span>, <span class="num">1</span>, <span class="num">7</span>, <span class="num">2</span>, <span class="num">9</span>])
+<span class="fn">print</span>(<span class="var">menor</span>, <span class="var">maior</span>)  <span class="cm"># 1 9</span></pre></div>`
+  },
+  {
+    mod: "MOD_03", title: "*args, **kwargs e Escopo",
+    difficulty: "INTERMEDIÁRIO", time: "22 MIN",
+    content: `
+      <p class="lesson-text"><strong>*args</strong> captura argumentos posicionais extras. <strong>**kwargs</strong> captura argumentos nomeados extras.</p>
+      <div class="code-block"><div class="code-header"><span class="code-lang">PYTHON</span><button class="code-copy" onclick="copyCode(this)">COPIAR</button></div><pre><span class="cm"># *args — argumentos variáveis</span>
+<span class="kw">def</span> <span class="fn">somar</span>(*<span class="var">numeros</span>):
+    <span class="kw">return</span> <span class="fn">sum</span>(<span class="var">numeros</span>)
+
+<span class="fn">print</span>(<span class="fn">somar</span>(<span class="num">1</span>, <span class="num">2</span>, <span class="num">3</span>))       <span class="cm"># 6</span>
+<span class="fn">print</span>(<span class="fn">somar</span>(<span class="num">10</span>, <span class="num">20</span>, <span class="num">30</span>, <span class="num">40</span>)) <span class="cm"># 100</span>
+
+<span class="cm"># **kwargs — argumentos nomeados variáveis</span>
+<span class="kw">def</span> <span class="fn">criar_replicante</span>(**<span class="var">dados</span>):
+    <span class="kw">for</span> <span class="var">campo</span>, <span class="var">valor</span> <span class="kw">in</span> <span class="var">dados</span>.<span class="fn">items</span>():
+        <span class="fn">print</span>(<span class="fn">f</span><span class="str">"{campo}: {valor}"</span>)
+
+<span class="fn">criar_replicante</span>(<span class="var">nome</span>=<span class="str">"Pris"</span>, <span class="var">modelo</span>=<span class="str">"N6"</span>, <span class="var">level</span>=<span class="str">"A"</span>)
+
+<span class="cm"># Escopo de variáveis</span>
+<span class="var">global_var</span> = <span class="str">"global"</span>
+
+<span class="kw">def</span> <span class="fn">testar_escopo</span>():
+    <span class="var">local_var</span> = <span class="str">"local"</span>
+    <span class="kw">global</span> <span class="var">global_var</span>
+    <span class="var">global_var</span> = <span class="str">"modificada"</span>
+    <span class="fn">print</span>(<span class="var">local_var</span>, <span class="var">global_var</span>)</pre></div>`
+  },
+  {
+    mod: "MOD_03", title: "Lambda e Funções de Ordem Superior",
+    difficulty: "INTERMEDIÁRIO", time: "18 MIN",
+    content: `
+      <p class="lesson-text"><strong>Lambda</strong> são funções anônimas de uma linha. <strong>map</strong>, <strong>filter</strong> e <strong>sorted</strong> são exemplos de funções de ordem superior.</p>
+      <div class="code-block"><div class="code-header"><span class="code-lang">PYTHON</span><button class="code-copy" onclick="copyCode(this)">COPIAR</button></div><pre><span class="cm"># Lambda</span>
+<span class="var">quadrado</span> = <span class="kw">lambda</span> <span class="var">x</span>: <span class="var">x</span> ** <span class="num">2</span>
+<span class="var">soma</span> = <span class="kw">lambda</span> <span class="var">a</span>, <span class="var">b</span>: <span class="var">a</span> + <span class="var">b</span>
+
+<span class="cm"># map() — aplica função a cada elemento</span>
+<span class="var">nums</span> = [<span class="num">1</span>, <span class="num">2</span>, <span class="num">3</span>, <span class="num">4</span>, <span class="num">5</span>]
+<span class="var">quadrados</span> = <span class="fn">list</span>(<span class="fn">map</span>(<span class="kw">lambda</span> <span class="var">x</span>: <span class="var">x</span>**<span class="num">2</span>, <span class="var">nums</span>))
+<span class="cm"># [1, 4, 9, 16, 25]</span>
+
+<span class="cm"># filter() — filtra elementos</span>
+<span class="var">pares</span> = <span class="fn">list</span>(<span class="fn">filter</span>(<span class="kw">lambda</span> <span class="var">x</span>: <span class="var">x</span> % <span class="num">2</span> == <span class="num">0</span>, <span class="var">nums</span>))
+<span class="cm"># [2, 4]</span>
+
+<span class="cm"># sorted() com key</span>
+<span class="var">replicantes</span> = [
+    {<span class="str">"nome"</span>: <span class="str">"Roy"</span>, <span class="str">"vida"</span>: <span class="num">2</span>},
+    {<span class="str">"nome"</span>: <span class="str">"Pris"</span>, <span class="str">"vida"</span>: <span class="num">5</span>},
+    {<span class="str">"nome"</span>: <span class="str">"Leon"</span>, <span class="str">"vida"</span>: <span class="num">1</span>},
+]
+<span class="var">ordenado</span> = <span class="fn">sorted</span>(<span class="var">replicantes</span>, key=<span class="kw">lambda</span> <span class="var">r</span>: <span class="var">r</span>[<span class="str">"vida"</span>])
+<span class="cm"># Leon, Roy, Pris</span></pre></div>`
+  },
+  // MOD 04 - Estruturas de Dados
+  {
+    mod: "MOD_04", title: "Listas",
+    difficulty: "BÁSICO", time: "20 MIN",
+    content: `
+      <p class="lesson-text">Listas são sequências <strong>mutáveis</strong> e ordenadas. São a estrutura mais versátil do Python.</p>
+      <div class="code-block"><div class="code-header"><span class="code-lang">PYTHON</span><button class="code-copy" onclick="copyCode(this)">COPIAR</button></div><pre><span class="cm"># Criação</span>
+<span class="var">replicantes</span> = [<span class="str">"Roy"</span>, <span class="str">"Pris"</span>, <span class="str">"Leon"</span>, <span class="str">"Zhora"</span>]
+<span class="var">misturado</span> = [<span class="num">1</span>, <span class="str">"dois"</span>, <span class="num">3.0</span>, <span class="kw">True</span>, [<span class="num">4</span>, <span class="num">5</span>]]
+
+<span class="cm"># Acesso e fatiamento</span>
+<span class="fn">print</span>(<span class="var">replicantes</span>[<span class="num">0</span>])     <span class="cm"># Roy</span>
+<span class="fn">print</span>(<span class="var">replicantes</span>[-<span class="num">1</span>])    <span class="cm"># Zhora</span>
+<span class="fn">print</span>(<span class="var">replicantes</span>[<span class="num">1</span>:<span class="num">3</span>])   <span class="cm"># ['Pris', 'Leon']</span>
+
+<span class="cm"># Métodos principais</span>
+<span class="var">replicantes</span>.<span class="fn">append</span>(<span class="str">"Rachael"</span>)  <span class="cm"># adiciona no final</span>
+<span class="var">replicantes</span>.<span class="fn">insert</span>(<span class="num">1</span>, <span class="str">"X"</span>)     <span class="cm"># insere na posição 1</span>
+<span class="var">replicantes</span>.<span class="fn">remove</span>(<span class="str">"X"</span>)       <span class="cm"># remove por valor</span>
+<span class="var">removido</span> = <span class="var">replicantes</span>.<span class="fn">pop</span>()  <span class="cm"># remove e retorna último</span>
+<span class="var">replicantes</span>.<span class="fn">sort</span>()            <span class="cm"># ordena in-place</span>
+<span class="var">copia</span> = <span class="var">replicantes</span>.<span class="fn">copy</span>()   <span class="cm"># cópia rasa</span>
+
+<span class="cm"># Utilitários</span>
+<span class="fn">print</span>(<span class="fn">len</span>(<span class="var">replicantes</span>))   <span class="cm"># tamanho</span>
+<span class="fn">print</span>(<span class="fn">sum</span>([<span class="num">1</span>,<span class="num">2</span>,<span class="num">3</span>]))      <span class="cm"># 6</span>
+<span class="fn">print</span>(<span class="fn">min</span>([<span class="num">3</span>,<span class="num">1</span>,<span class="num">2</span>]))      <span class="cm"># 1</span>
+<span class="fn">print</span>(<span class="fn">max</span>([<span class="num">3</span>,<span class="num">1</span>,<span class="num">2</span>]))      <span class="cm"># 3</span></pre></div>`
+  },
+  {
+    mod: "MOD_04", title: "Dicionários",
+    difficulty: "INTERMEDIÁRIO", time: "22 MIN",
+    content: `
+      <p class="lesson-text">Dicionários armazenam pares <strong>chave:valor</strong>. São extremamente eficientes para busca — O(1).</p>
+      <div class="code-block"><div class="code-header"><span class="code-lang">PYTHON</span><button class="code-copy" onclick="copyCode(this)">COPIAR</button></div><pre><span class="cm"># Criação</span>
+<span class="var">replicante</span> = {
+    <span class="str">"id"</span>: <span class="str">"N6MAA10816"</span>,
+    <span class="str">"nome"</span>: <span class="str">"Roy Batty"</span>,
+    <span class="str">"modelo"</span>: <span class="str">"Nexus-6"</span>,
+    <span class="str">"nivel"</span>: <span class="str">"A"</span>,
+    <span class="str">"ativo"</span>: <span class="kw">True</span>
+}
+
+<span class="cm"># Acesso seguro</span>
+<span class="fn">print</span>(<span class="var">replicante</span>[<span class="str">"nome"</span>])       <span class="cm"># Roy Batty</span>
+<span class="fn">print</span>(<span class="var">replicante</span>.<span class="fn">get</span>(<span class="str">"cidade"</span>, <span class="str">"N/A"</span>))  <span class="cm"># N/A (sem erro!)</span>
+
+<span class="cm"># Modificação</span>
+<span class="var">replicante</span>[<span class="str">"cidade"</span>] = <span class="str">"Los Angeles"</span>
+<span class="var">replicante</span>.<span class="fn">update</span>({<span class="str">"ano"</span>: <span class="num">2019</span>, <span class="str">"nivel"</span>: <span class="str">"A+"</span>})
+<span class="kw">del</span> <span class="var">replicante</span>[<span class="str">"ativo"</span>]
+
+<span class="cm"># Iteração</span>
+<span class="kw">for</span> <span class="var">chave</span> <span class="kw">in</span> <span class="var">replicante</span>.<span class="fn">keys</span>(): ...
+<span class="kw">for</span> <span class="var">valor</span> <span class="kw">in</span> <span class="var">replicante</span>.<span class="fn">values</span>(): ...
+<span class="kw">for</span> <span class="var">k</span>, <span class="var">v</span> <span class="kw">in</span> <span class="var">replicante</span>.<span class="fn">items</span>(): ...
+
+<span class="cm"># Dict aninhado</span>
+<span class="var">sistema</span> = {
+    <span class="str">"cpu"</span>: {<span class="str">"modelo"</span>: <span class="str">"Quantum X"</span>, <span class="str">"ghz"</span>: <span class="num">5.2</span>},
+    <span class="str">"ram"</span>: {<span class="str">"gb"</span>: <span class="num">128</span>, <span class="str">"tipo"</span>: <span class="str">"DDR6"</span>}
+}
+<span class="fn">print</span>(<span class="var">sistema</span>[<span class="str">"cpu"</span>][<span class="str">"ghz"</span>])  <span class="cm"># 5.2</span></pre></div>`
+  },
+  {
+    mod: "MOD_04", title: "Tuplas e Sets",
+    difficulty: "BÁSICO", time: "15 MIN",
+    content: `
+      <p class="lesson-text"><strong>Tuplas</strong> são imutáveis. <strong>Sets</strong> são coleções sem duplicatas e sem ordem.</p>
+      <div class="code-block"><div class="code-header"><span class="code-lang">PYTHON</span><button class="code-copy" onclick="copyCode(this)">COPIAR</button></div><pre><span class="cm"># TUPLAS — imutáveis</span>
+<span class="var">coordenadas</span> = (<span class="num">37.7749</span>, -<span class="num">122.4194</span>)
+<span class="var">lat</span>, <span class="var">lon</span> = <span class="var">coordenadas</span>  <span class="cm"># unpacking</span>
+<span class="fn">print</span>(<span class="var">coordenadas</span>[<span class="num">0</span>])    <span class="cm"># 37.7749</span>
+<span class="cm"># coordenadas[0] = 0  ← ERRO!</span>
+
+<span class="cm"># Tuplas como chaves de dict</span>
+<span class="var">mapa</span> = {(<span class="num">0</span>,<span class="num">0</span>): <span class="str">"origem"</span>, (<span class="num">1</span>,<span class="num">0</span>): <span class="str">"leste"</span>}
+
+<span class="cm"># SETS — sem duplicatas</span>
+<span class="var">ids</span> = {<span class="num">1</span>, <span class="num">2</span>, <span class="num">3</span>, <span class="num">2</span>, <span class="num">1</span>}  <span class="cm"># {1, 2, 3}</span>
+<span class="var">ids</span>.<span class="fn">add</span>(<span class="num">4</span>)
+<span class="var">ids</span>.<span class="fn">discard</span>(<span class="num">10</span>)  <span class="cm"># não gera erro se não existe</span>
+
+<span class="cm"># Operações de conjunto</span>
+<span class="var">a</span> = {<span class="num">1</span>, <span class="num">2</span>, <span class="num">3</span>, <span class="num">4</span>}
+<span class="var">b</span> = {<span class="num">3</span>, <span class="num">4</span>, <span class="num">5</span>, <span class="num">6</span>}
+<span class="fn">print</span>(<span class="var">a</span> & <span class="var">b</span>)  <span class="cm"># interseção: {3, 4}</span>
+<span class="fn">print</span>(<span class="var">a</span> | <span class="var">b</span>)  <span class="cm"># união: {1,2,3,4,5,6}</span>
+<span class="fn">print</span>(<span class="var">a</span> - <span class="var">b</span>)  <span class="cm"># diferença: {1, 2}</span>
+<span class="fn">print</span>(<span class="var">a</span> ^ <span class="var">b</span>)  <span class="cm"># simétrica: {1,2,5,6}</span></pre></div>`
+  },
+  // MOD 05 - POO
+  {
+    mod: "MOD_05", title: "Classes e Objetos",
+    difficulty: "INTERMEDIÁRIO", time: "25 MIN",
+    content: `
+      <p class="lesson-text">Classes são moldes para criar objetos. Em Python, tudo é um objeto — até funções e classes.</p>
+      <div class="code-block"><div class="code-header"><span class="code-lang">PYTHON</span><button class="code-copy" onclick="copyCode(this)">COPIAR</button></div><pre><span class="kw">class</span> <span class="cls">Replicante</span>:
+    <span class="cm"># Atributo de classe (compartilhado)</span>
+    <span class="var">fabricante</span> = <span class="str">"Tyrell Corp"</span>
+    
+    <span class="kw">def</span> <span class="fn">__init__</span>(self, <span class="var">nome</span>, <span class="var">modelo</span>, <span class="var">nivel</span>):
+        <span class="cm"># Atributos de instância</span>
+        self.<span class="var">nome</span> = <span class="var">nome</span>
+        self.<span class="var">modelo</span> = <span class="var">modelo</span>
+        self.<span class="var">nivel</span> = <span class="var">nivel</span>
+        self.<span class="var">_memoria</span> = []  <span class="cm"># "privado" por convenção</span>
+    
+    <span class="kw">def</span> <span class="fn">apresentar</span>(self):
+        <span class="kw">return</span> <span class="fn">f</span><span class="str">"{self.nome} | {self.modelo} | Nível {self.nivel}"</span>
+    
+    <span class="kw">def</span> <span class="fn">adicionar_memoria</span>(self, <span class="var">mem</span>):
+        self.<span class="var">_memoria</span>.<span class="fn">append</span>(<span class="var">mem</span>)
+    
+    <span class="cm"># Representação string</span>
+    <span class="kw">def</span> <span class="fn">__repr__</span>(self):
+        <span class="kw">return</span> <span class="fn">f</span><span class="str">"Replicante({self.nome!r})"</span>
+    
+    <span class="cm"># Método de classe</span>
+    <span class="kw">@classmethod</span>
+    <span class="kw">def</span> <span class="fn">nexus6</span>(<span class="var">cls</span>, <span class="var">nome</span>):
+        <span class="kw">return</span> <span class="fn">cls</span>(<span class="var">nome</span>, <span class="str">"Nexus-6"</span>, <span class="str">"A"</span>)
+
+<span class="cm"># Uso</span>
+<span class="var">roy</span> = <span class="cls">Replicante</span>(<span class="str">"Roy"</span>, <span class="str">"Nexus-6"</span>, <span class="str">"A"</span>)
+<span class="var">pris</span> = <span class="cls">Replicante</span>.<span class="fn">nexus6</span>(<span class="str">"Pris"</span>)
+<span class="fn">print</span>(<span class="var">roy</span>.<span class="fn">apresentar</span>())
+<span class="fn">print</span>(<span class="cls">Replicante</span>.<span class="var">fabricante</span>)</pre></div>`
+  },
+  {
+    mod: "MOD_05", title: "Herança e Polimorfismo",
+    difficulty: "INTERMEDIÁRIO", time: "22 MIN",
+    content: `
+      <p class="lesson-text"><strong>Herança</strong> permite criar classes filhas que herdam atributos e métodos. <strong>Polimorfismo</strong> permite que objetos diferentes respondam ao mesmo método de formas distintas.</p>
+      <div class="code-block"><div class="code-header"><span class="code-lang">PYTHON</span><button class="code-copy" onclick="copyCode(this)">COPIAR</button></div><pre><span class="kw">class</span> <span class="cls">Androide</span>:
+    <span class="kw">def</span> <span class="fn">__init__</span>(self, <span class="var">nome</span>):
+        self.<span class="var">nome</span> = <span class="var">nome</span>
+    
+    <span class="kw">def</span> <span class="fn">missao</span>(self):
+        <span class="kw">return</span> <span class="str">"Missão não definida"</span>
+    
+    <span class="kw">def</span> <span class="fn">relatorio</span>(self):
+        <span class="kw">return</span> <span class="fn">f</span><span class="str">"{self.nome}: {self.missao()}"</span>
+
+
+<span class="kw">class</span> <span class="cls">Blade</span>(<span class="cls">Androide</span>):
+    <span class="kw">def</span> <span class="fn">__init__</span>(self, <span class="var">nome</span>, <span class="var">badge</span>):
+        <span class="fn">super</span>().<span class="fn">__init__</span>(<span class="var">nome</span>)  <span class="cm"># Chama pai</span>
+        self.<span class="var">badge</span> = <span class="var">badge</span>
+    
+    <span class="kw">def</span> <span class="fn">missao</span>(self):  <span class="cm"># Override!</span>
+        <span class="kw">return</span> <span class="str">"Retire replicantes foragidos"</span>
+
+
+<span class="kw">class</span> <span class="cls">AssistenteAndroide</span>(<span class="cls">Androide</span>):
+    <span class="kw">def</span> <span class="fn">missao</span>(self):  <span class="cm"># Override!</span>
+        <span class="kw">return</span> <span class="str">"Servir e obedecer"</span>
+
+
+<span class="cm"># Polimorfismo em ação</span>
+<span class="var">unidades</span> = [<span class="cls">Blade</span>(<span class="str">"Deckard"</span>, <span class="str">"KD6-3.7"</span>), <span class="cls">AssistenteAndroide</span>(<span class="str">"K"</span>)]
+<span class="kw">for</span> <span class="var">u</span> <span class="kw">in</span> <span class="var">unidades</span>:
+    <span class="fn">print</span>(<span class="var">u</span>.<span class="fn">relatorio</span>())  <span class="cm"># mesmo método, resultados diferentes</span>
+
+<span class="cm"># Verificação</span>
+<span class="fn">print</span>(<span class="fn">isinstance</span>(<span class="var">unidades</span>[<span class="num">0</span>], <span class="cls">Androide</span>))  <span class="cm"># True</span>
+<span class="fn">print</span>(<span class="fn">issubclass</span>(<span class="cls">Blade</span>, <span class="cls">Androide</span>))        <span class="cm"># True</span></pre></div>`
+  },
+  {
+    mod: "MOD_05", title: "Dunder Methods e Properties",
+    difficulty: "AVANÇADO", time: "20 MIN",
+    content: `
+      <p class="lesson-text">Métodos dunder (<strong>double underscore</strong>) permitem que seus objetos se comportem como tipos nativos do Python.</p>
+      <div class="code-block"><div class="code-header"><span class="code-lang">PYTHON</span><button class="code-copy" onclick="copyCode(this)">COPIAR</button></div><pre><span class="kw">class</span> <span class="cls">Frota</span>:
+    <span class="kw">def</span> <span class="fn">__init__</span>(self, <span class="var">unidades</span>):
+        self.<span class="var">_unidades</span> = <span class="fn">list</span>(<span class="var">unidades</span>)
+    
+    <span class="kw">def</span> <span class="fn">__len__</span>(self):        <span class="cm"># len(frota)</span>
+        <span class="kw">return</span> <span class="fn">len</span>(self.<span class="var">_unidades</span>)
+    
+    <span class="kw">def</span> <span class="fn">__getitem__</span>(self, <span class="var">idx</span>):  <span class="cm"># frota[0]</span>
+        <span class="kw">return</span> self.<span class="var">_unidades</span>[<span class="var">idx</span>]
+    
+    <span class="kw">def</span> <span class="fn">__contains__</span>(self, <span class="var">item</span>):  <span class="cm"># x in frota</span>
+        <span class="kw">return</span> <span class="var">item</span> <span class="kw">in</span> self.<span class="var">_unidades</span>
+    
+    <span class="kw">def</span> <span class="fn">__repr__</span>(self):
+        <span class="kw">return</span> <span class="fn">f</span><span class="str">"Frota({self._unidades})"</span>
+
+<span class="cm"># @property — getter/setter elegante</span>
+<span class="kw">class</span> <span class="cls">Replicante</span>:
+    <span class="kw">def</span> <span class="fn">__init__</span>(self, <span class="var">vida</span>):
+        self.<span class="var">_vida</span> = <span class="var">vida</span>
+    
+    <span class="kw">@property</span>
+    <span class="kw">def</span> <span class="fn">vida</span>(self):
+        <span class="kw">return</span> self.<span class="var">_vida</span>
+    
+    <span class="kw">@vida.setter</span>
+    <span class="kw">def</span> <span class="fn">vida</span>(self, <span class="var">valor</span>):
+        <span class="kw">if</span> <span class="var">valor</span> < <span class="num">0</span>:
+            <span class="kw">raise</span> <span class="cls">ValueError</span>(<span class="str">"Vida não pode ser negativa"</span>)
+        self.<span class="var">_vida</span> = <span class="var">valor</span>
+
+<span class="var">r</span> = <span class="cls">Replicante</span>(<span class="num">4</span>)
+<span class="fn">print</span>(<span class="var">r</span>.<span class="var">vida</span>)   <span class="cm"># 4 (chama getter)</span>
+<span class="var">r</span>.<span class="var">vida</span> = <span class="num">2</span>     <span class="cm"># chama setter</span></pre></div>`
+  },
+  // MOD 06 - Erros
+  {
+    mod: "MOD_06", title: "Try, Except e Finally",
+    difficulty: "INTERMEDIÁRIO", time: "18 MIN",
+    content: `
+      <p class="lesson-text">Tratamento de exceções evita que seu programa quebre. Use <strong>try/except</strong> para capturar erros e <strong>finally</strong> para limpeza garantida.</p>
+      <div class="code-block"><div class="code-header"><span class="code-lang">PYTHON</span><button class="code-copy" onclick="copyCode(this)">COPIAR</button></div><pre><span class="cm"># Hierarquia básica de exceções</span>
+<span class="kw">try</span>:
+    <span class="var">x</span> = <span class="fn">int</span>(<span class="fn">input</span>(<span class="str">"Número: "</span>))
+    <span class="var">resultado</span> = <span class="num">100</span> / <span class="var">x</span>
+    <span class="fn">print</span>(<span class="var">resultado</span>)
+
+<span class="kw">except</span> <span class="cls">ValueError</span>:
+    <span class="fn">print</span>(<span class="str">"Entrada inválida — não é número"</span>)
+
+<span class="kw">except</span> <span class="cls">ZeroDivisionError</span>:
+    <span class="fn">print</span>(<span class="str">"Divisão por zero"</span>)
+
+<span class="kw">except</span> (<span class="cls">TypeError</span>, <span class="cls">RuntimeError</span>) <span class="kw">as</span> <span class="var">e</span>:
+    <span class="fn">print</span>(<span class="fn">f</span><span class="str">"Erro múltiplo: {e}"</span>)
+
+<span class="kw">except</span> <span class="cls">Exception</span> <span class="kw">as</span> <span class="var">e</span>:
+    <span class="fn">print</span>(<span class="fn">f</span><span class="str">"Erro inesperado: {type(e).__name__}: {e}"</span>)
+
+<span class="kw">else</span>:
+    <span class="fn">print</span>(<span class="str">"Tudo OK!"</span>)  <span class="cm"># Se não houve exceção</span>
+
+<span class="kw">finally</span>:
+    <span class="fn">print</span>(<span class="str">"Sempre executa"</span>)  <span class="cm"># Para limpeza</span>
+
+<span class="cm"># raise — lançar exceção manualmente</span>
+<span class="kw">def</span> <span class="fn">verificar_nivel</span>(<span class="var">nivel</span>):
+    <span class="kw">if</span> <span class="var">nivel</span> <span class="kw">not</span> <span class="kw">in</span> [<span class="str">"A"</span>, <span class="str">"B"</span>, <span class="str">"C"</span>]:
+        <span class="kw">raise</span> <span class="cls">ValueError</span>(<span class="fn">f</span><span class="str">"Nível inválido: {nivel}"</span>)
+    <span class="kw">return</span> <span class="var">nivel</span></pre></div>`
+  },
+  {
+    mod: "MOD_06", title: "Exceções Customizadas",
+    difficulty: "AVANÇADO", time: "15 MIN",
+    content: `
+      <p class="lesson-text">Crie suas próprias classes de exceção para tornar o código mais expressivo e os erros mais informativos.</p>
+      <div class="code-block"><div class="code-header"><span class="code-lang">PYTHON</span><button class="code-copy" onclick="copyCode(this)">COPIAR</button></div><pre><span class="cm"># Exceção base do projeto</span>
+<span class="kw">class</span> <span class="cls">SistemaError</span>(<span class="cls">Exception</span>):
+    <span class="str">"""Erro base do sistema de replicantes"""</span>
+    <span class="kw">pass</span>
+
+<span class="cm"># Exceções específicas</span>
+<span class="kw">class</span> <span class="cls">ReplicanteNaoEncontrado</span>(<span class="cls">SistemaError</span>):
+    <span class="kw">def</span> <span class="fn">__init__</span>(self, <span class="var">id_rep</span>):
+        self.<span class="var">id_rep</span> = <span class="var">id_rep</span>
+        <span class="fn">super</span>().<span class="fn">__init__</span>(<span class="fn">f</span><span class="str">"Replicante {id_rep} não encontrado no banco"</span>)
+
+<span class="kw">class</span> <span class="cls">NivelInsuficiente</span>(<span class="cls">SistemaError</span>):
+    <span class="kw">def</span> <span class="fn">__init__</span>(self, <span class="var">requerido</span>, <span class="var">atual</span>):
+        <span class="fn">super</span>().<span class="fn">__init__</span>(
+            <span class="fn">f</span><span class="str">"Nível {requerido} requerido, atual: {atual}"</span>
+        )
+
+<span class="cm"># Uso</span>
+<span class="kw">def</span> <span class="fn">buscar_replicante</span>(<span class="var">id_rep</span>):
+    <span class="var">db</span> = {<span class="str">"N6-001"</span>: <span class="str">"Roy"</span>, <span class="str">"N6-002"</span>: <span class="str">"Pris"</span>}
+    <span class="kw">if</span> <span class="var">id_rep</span> <span class="kw">not</span> <span class="kw">in</span> <span class="var">db</span>:
+        <span class="kw">raise</span> <span class="cls">ReplicanteNaoEncontrado</span>(<span class="var">id_rep</span>)
+    <span class="kw">return</span> <span class="var">db</span>[<span class="var">id_rep</span>]
+
+<span class="kw">try</span>:
+    <span class="fn">buscar_replicante</span>(<span class="str">"N6-999"</span>)
+<span class="kw">except</span> <span class="cls">ReplicanteNaoEncontrado</span> <span class="kw">as</span> <span class="var">e</span>:
+    <span class="fn">print</span>(<span class="fn">f</span><span class="str">"ALERTA: {e}"</span>)
+<span class="kw">except</span> <span class="cls">SistemaError</span> <span class="kw">as</span> <span class="var">e</span>:
+    <span class="fn">print</span>(<span class="fn">f</span><span class="str">"Falha no sistema: {e}"</span>)</pre></div>`
+  },
+  // MOD 07 - Arquivos
+  {
+    mod: "MOD_07", title: "Leitura e Escrita de Arquivos",
+    difficulty: "INTERMEDIÁRIO", time: "20 MIN",
+    content: `
+      <p class="lesson-text">Trabalhar com arquivos em Python é simples com o gerenciador de contexto <strong>with</strong>, que fecha automaticamente o arquivo.</p>
+      <div class="code-block"><div class="code-header"><span class="code-lang">PYTHON</span><button class="code-copy" onclick="copyCode(this)">COPIAR</button></div><pre><span class="cm"># Escrita</span>
+<span class="kw">with</span> <span class="fn">open</span>(<span class="str">"log.txt"</span>, <span class="str">"w"</span>, encoding=<span class="str">"utf-8"</span>) <span class="kw">as</span> <span class="var">f</span>:
+    <span class="var">f</span>.<span class="fn">write</span>(<span class="str">"Sistema iniciado\n"</span>)
+    <span class="var">f</span>.<span class="fn">writelines</span>([<span class="str">"Linha 1\n"</span>, <span class="str">"Linha 2\n"</span>])
+
+<span class="cm"># Leitura completa</span>
+<span class="kw">with</span> <span class="fn">open</span>(<span class="str">"log.txt"</span>, <span class="str">"r"</span>, encoding=<span class="str">"utf-8"</span>) <span class="kw">as</span> <span class="var">f</span>:
+    <span class="var">conteudo</span> = <span class="var">f</span>.<span class="fn">read</span>()      <span class="cm"># tudo de uma vez</span>
+    <span class="var">linhas</span> = <span class="var">f</span>.<span class="fn">readlines</span>()   <span class="cm"># lista de linhas</span>
+
+<span class="cm"># Leitura linha a linha (eficiente para arquivos grandes)</span>
+<span class="kw">with</span> <span class="fn">open</span>(<span class="str">"log.txt"</span>) <span class="kw">as</span> <span class="var">f</span>:
+    <span class="kw">for</span> <span class="var">linha</span> <span class="kw">in</span> <span class="var">f</span>:
+        <span class="fn">print</span>(<span class="var">linha</span>.<span class="fn">strip</span>())
+
+<span class="cm"># Modos: "r"=ler, "w"=escrever, "a"=append
+# "b"=binário, "r+"=leitura+escrita</span>
+
+<span class="cm"># pathlib — maneira moderna</span>
+<span class="kw">from</span> pathlib <span class="kw">import</span> <span class="cls">Path</span>
+
+<span class="var">p</span> = <span class="cls">Path</span>(<span class="str">"dados"</span>) / <span class="str">"log.txt"</span>
+<span class="var">p</span>.<span class="fn">parent</span>.<span class="fn">mkdir</span>(exist_ok=<span class="kw">True</span>)
+<span class="var">p</span>.<span class="fn">write_text</span>(<span class="str">"conteúdo"</span>, encoding=<span class="str">"utf-8"</span>)
+<span class="var">texto</span> = <span class="var">p</span>.<span class="fn">read_text</span>(encoding=<span class="str">"utf-8"</span>)</pre></div>`
+  },
+  {
+    mod: "MOD_07", title: "JSON e CSV",
+    difficulty: "INTERMEDIÁRIO", time: "18 MIN",
+    content: `
+      <p class="lesson-text"><strong>JSON</strong> é o formato padrão para APIs e configurações. <strong>CSV</strong> é ideal para dados tabulares.</p>
+      <div class="code-block"><div class="code-header"><span class="code-lang">PYTHON</span><button class="code-copy" onclick="copyCode(this)">COPIAR</button></div><pre><span class="kw">import</span> json
+<span class="kw">import</span> csv
+
+<span class="cm"># JSON — Escrever</span>
+<span class="var">dados</span> = {
+    <span class="str">"sistema"</span>: <span class="str">"Tyrell Corp"</span>,
+    <span class="str">"replicantes"</span>: [
+        {<span class="str">"nome"</span>: <span class="str">"Roy"</span>, <span class="str">"nivel"</span>: <span class="str">"A"</span>},
+        {<span class="str">"nome"</span>: <span class="str">"Pris"</span>, <span class="str">"nivel"</span>: <span class="str">"A"</span>}
+    ]
+}
+
+<span class="kw">with</span> <span class="fn">open</span>(<span class="str">"dados.json"</span>, <span class="str">"w"</span>) <span class="kw">as</span> <span class="var">f</span>:
+    json.<span class="fn">dump</span>(<span class="var">dados</span>, <span class="var">f</span>, indent=<span class="num">2</span>, ensure_ascii=<span class="kw">False</span>)
+
+<span class="cm"># JSON — Ler</span>
+<span class="kw">with</span> <span class="fn">open</span>(<span class="str">"dados.json"</span>) <span class="kw">as</span> <span class="var">f</span>:
+    <span class="var">carregado</span> = json.<span class="fn">load</span>(<span class="var">f</span>)
+
+<span class="cm"># String ↔ JSON</span>
+<span class="var">texto_json</span> = json.<span class="fn">dumps</span>(<span class="var">dados</span>)        <span class="cm"># dict → str</span>
+<span class="var">volta</span> = json.<span class="fn">loads</span>(<span class="var">texto_json</span>)        <span class="cm"># str → dict</span>
+
+<span class="cm"># CSV — Escrever</span>
+<span class="kw">with</span> <span class="fn">open</span>(<span class="str">"logs.csv"</span>, <span class="str">"w"</span>, newline=<span class="str">""</span>) <span class="kw">as</span> <span class="var">f</span>:
+    <span class="var">writer</span> = csv.<span class="fn">DictWriter</span>(<span class="var">f</span>, fieldnames=[<span class="str">"nome"</span>, <span class="str">"nivel"</span>])
+    <span class="var">writer</span>.<span class="fn">writeheader</span>()
+    <span class="var">writer</span>.<span class="fn">writerows</span>(<span class="var">dados</span>[<span class="str">"replicantes"</span>])
+
+<span class="cm"># CSV — Ler</span>
+<span class="kw">with</span> <span class="fn">open</span>(<span class="str">"logs.csv"</span>) <span class="kw">as</span> <span class="var">f</span>:
+    <span class="kw">for</span> <span class="var">row</span> <span class="kw">in</span> csv.<span class="fn">DictReader</span>(<span class="var">f</span>):
+        <span class="fn">print</span>(<span class="var">row</span>[<span class="str">"nome"</span>], <span class="var">row</span>[<span class="str">"nivel"</span>])</pre></div>`
+  },
+  // MOD 08 - Compreensões
+  {
+    mod: "MOD_08", title: "List e Dict Comprehensions",
+    difficulty: "INTERMEDIÁRIO", time: "20 MIN",
+    content: `
+      <p class="lesson-text">Comprehensions são a forma <em>pythônica</em> de criar coleções de forma concisa e eficiente.</p>
+      <div class="code-block"><div class="code-header"><span class="code-lang">PYTHON</span><button class="code-copy" onclick="copyCode(this)">COPIAR</button></div><pre><span class="cm"># List Comprehension</span>
+<span class="cm"># [expressão for item in iterável if condição]</span>
+
+<span class="var">quadrados</span> = [<span class="var">x</span>**<span class="num">2</span> <span class="kw">for</span> <span class="var">x</span> <span class="kw">in</span> <span class="fn">range</span>(<span class="num">10</span>)]
+<span class="var">pares</span> = [<span class="var">x</span> <span class="kw">for</span> <span class="var">x</span> <span class="kw">in</span> <span class="fn">range</span>(<span class="num">20</span>) <span class="kw">if</span> <span class="var">x</span> % <span class="num">2</span> == <span class="num">0</span>]
+<span class="var">nomes</span> = [<span class="var">n</span>.<span class="fn">upper</span>() <span class="kw">for</span> <span class="var">n</span> <span class="kw">in</span> [<span class="str">"roy"</span>, <span class="str">"pris"</span>]]
+
+<span class="cm"># Aninhado</span>
+<span class="var">matriz</span> = [[<span class="var">i</span>*<span class="var">j</span> <span class="kw">for</span> <span class="var">j</span> <span class="kw">in</span> <span class="fn">range</span>(<span class="num">3</span>)] <span class="kw">for</span> <span class="var">i</span> <span class="kw">in</span> <span class="fn">range</span>(<span class="num">3</span>)]
+<span class="cm"># [[0,0,0],[0,1,2],[0,2,4]]</span>
+
+<span class="cm"># Achatar lista de listas</span>
+<span class="var">achatada</span> = [<span class="var">x</span> <span class="kw">for</span> <span class="var">sub</span> <span class="kw">in</span> <span class="var">matriz</span> <span class="kw">for</span> <span class="var">x</span> <span class="kw">in</span> <span class="var">sub</span>]
+
+<span class="cm"># Dict Comprehension</span>
+<span class="var">cubos</span> = {<span class="var">x</span>: <span class="var">x</span>**<span class="num">3</span> <span class="kw">for</span> <span class="var">x</span> <span class="kw">in</span> <span class="fn">range</span>(<span class="num">1</span>, <span class="num">6</span>)}
+<span class="cm"># {1:1, 2:8, 3:27, 4:64, 5:125}</span>
+
+<span class="cm"># Inverter dicionário</span>
+<span class="var">original</span> = {<span class="str">"a"</span>: <span class="num">1</span>, <span class="str">"b"</span>: <span class="num">2</span>}
+<span class="var">invertido</span> = {<span class="var">v</span>: <span class="var">k</span> <span class="kw">for</span> <span class="var">k</span>, <span class="var">v</span> <span class="kw">in</span> <span class="var">original</span>.<span class="fn">items</span>()}
+
+<span class="cm"># Set Comprehension</span>
+<span class="var">letras</span> = {<span class="var">c</span>.<span class="fn">lower</span>() <span class="kw">for</span> <span class="var">c</span> <span class="kw">in</span> <span class="str">"Python"</span>}</pre></div>`
+  },
+  {
+    mod: "MOD_08", title: "Generators e yield",
+    difficulty: "AVANÇADO", time: "22 MIN",
+    content: `
+      <p class="lesson-text">Generators produzem valores <strong>sob demanda</strong>, usando memória mínima. São ideais para sequências grandes ou infinitas.</p>
+      <div class="code-block"><div class="code-header"><span class="code-lang">PYTHON</span><button class="code-copy" onclick="copyCode(this)">COPIAR</button></div><pre><span class="cm"># Generator function com yield</span>
+<span class="kw">def</span> <span class="fn">fibonacci</span>():
+    <span class="var">a</span>, <span class="var">b</span> = <span class="num">0</span>, <span class="num">1</span>
+    <span class="kw">while</span> <span class="kw">True</span>:
+        <span class="kw">yield</span> <span class="var">a</span>           <span class="cm"># pausa aqui</span>
+        <span class="var">a</span>, <span class="var">b</span> = <span class="var">b</span>, <span class="var">a</span> + <span class="var">b</span>
+
+<span class="var">fib</span> = <span class="fn">fibonacci</span>()
+<span class="kw">for</span> <span class="var">_</span> <span class="kw">in</span> <span class="fn">range</span>(<span class="num">10</span>):
+    <span class="fn">print</span>(<span class="fn">next</span>(<span class="var">fib</span>), end=<span class="str">" "</span>)  <span class="cm"># 0 1 1 2 3 5 8 13 21 34</span>
+
+<span class="cm"># Generator expression (como list comp, mas com ())</span>
+<span class="var">gen</span> = (<span class="var">x</span>**<span class="num">2</span> <span class="kw">for</span> <span class="var">x</span> <span class="kw">in</span> <span class="fn">range</span>(<span class="num">1000000</span>))
+<span class="fn">print</span>(<span class="fn">next</span>(<span class="var">gen</span>))  <span class="cm"># 0 — apenas 1 item calculado!</span>
+
+<span class="cm"># yield from — delega para outro generator</span>
+<span class="kw">def</span> <span class="fn">cadeia</span>(*<span class="var">iters</span>):
+    <span class="kw">for</span> <span class="var">it</span> <span class="kw">in</span> <span class="var">iters</span>:
+        <span class="kw">yield</span> <span class="kw">from</span> <span class="var">it</span>
+
+<span class="var">combinado</span> = <span class="fn">cadeia</span>([<span class="num">1</span>,<span class="num">2</span>], [<span class="num">3</span>,<span class="num">4</span>], [<span class="num">5</span>])
+<span class="fn">print</span>(<span class="fn">list</span>(<span class="var">combinado</span>))  <span class="cm"># [1,2,3,4,5]</span></pre></div>
+      <div class="info-box"><p class="lesson-text" style="margin:0">Diferença chave: <strong>list</strong> gera tudo de uma vez na memória. Um <strong>generator</strong> gera um item por vez — eficiente para grandes volumes de dados.</p></div>`
+  },
+  // MOD 09 - Decorators
+  {
+    mod: "MOD_09", title: "Closures",
+    difficulty: "AVANÇADO", time: "18 MIN",
+    content: `
+      <p class="lesson-text">Uma <strong>closure</strong> é uma função que "lembra" o ambiente onde foi criada, mesmo após a função externa ter retornado.</p>
+      <div class="code-block"><div class="code-header"><span class="code-lang">PYTHON</span><button class="code-copy" onclick="copyCode(this)">COPIAR</button></div><pre><span class="cm"># Closure básica</span>
+<span class="kw">def</span> <span class="fn">multiplicador</span>(<span class="var">fator</span>):
+    <span class="kw">def</span> <span class="fn">multiplicar</span>(<span class="var">numero</span>):
+        <span class="kw">return</span> <span class="var">numero</span> * <span class="var">fator</span>  <span class="cm"># "lembra" fator</span>
+    <span class="kw">return</span> <span class="fn">multiplicar</span>
+
+<span class="var">dobro</span> = <span class="fn">multiplicador</span>(<span class="num">2</span>)
+<span class="var">triplo</span> = <span class="fn">multiplicador</span>(<span class="num">3</span>)
+<span class="fn">print</span>(<span class="fn">dobro</span>(<span class="num">5</span>))   <span class="cm"># 10</span>
+<span class="fn">print</span>(<span class="fn">triplo</span>(<span class="num">5</span>))  <span class="cm"># 15</span>
+
+<span class="cm"># Closure com estado (contador)</span>
+<span class="kw">def</span> <span class="fn">criar_contador</span>():
+    <span class="var">contagem</span> = <span class="num">0</span>
+    <span class="kw">def</span> <span class="fn">incrementar</span>(<span class="var">n</span>=<span class="num">1</span>):
+        <span class="kw">nonlocal</span> <span class="var">contagem</span>  <span class="cm"># modifica variável do escopo externo</span>
+        <span class="var">contagem</span> += <span class="var">n</span>
+        <span class="kw">return</span> <span class="var">contagem</span>
+    <span class="kw">return</span> <span class="fn">incrementar</span>
+
+<span class="var">c</span> = <span class="fn">criar_contador</span>()
+<span class="fn">print</span>(<span class="fn">c</span>())    <span class="cm"># 1</span>
+<span class="fn">print</span>(<span class="fn">c</span>(<span class="num">5</span>))   <span class="cm"># 6</span>
+<span class="fn">print</span>(<span class="fn">c</span>())    <span class="cm"># 7</span></pre></div>`
+  },
+  {
+    mod: "MOD_09", title: "Decorators",
+    difficulty: "AVANÇADO", time: "25 MIN",
+    content: `
+      <p class="lesson-text">Decorators modificam o comportamento de funções sem alterar seu código. São closures com açúcar sintático <strong>@</strong>.</p>
+      <div class="code-block"><div class="code-header"><span class="code-lang">PYTHON</span><button class="code-copy" onclick="copyCode(this)">COPIAR</button></div><pre><span class="kw">from</span> functools <span class="kw">import</span> wraps
+<span class="kw">import</span> time
+
+<span class="cm"># Decorator de tempo</span>
+<span class="kw">def</span> <span class="fn">cronometrar</span>(<span class="var">func</span>):
+    <span class="kw">@</span><span class="fn">wraps</span>(<span class="var">func</span>)  <span class="cm"># preserva metadados</span>
+    <span class="kw">def</span> <span class="fn">wrapper</span>(*<span class="var">args</span>, **<span class="var">kwargs</span>):
+        <span class="var">inicio</span> = time.<span class="fn">time</span>()
+        <span class="var">resultado</span> = <span class="var">func</span>(*<span class="var">args</span>, **<span class="var">kwargs</span>)
+        <span class="var">tempo</span> = time.<span class="fn">time</span>() - <span class="var">inicio</span>
+        <span class="fn">print</span>(<span class="fn">f</span><span class="str">"{func.__name__} levou {tempo:.4f}s"</span>)
+        <span class="kw">return</span> <span class="var">resultado</span>
+    <span class="kw">return</span> <span class="fn">wrapper</span>
+
+<span class="kw">@</span><span class="fn">cronometrar</span>
+<span class="kw">def</span> <span class="fn">processar_dados</span>(<span class="var">n</span>):
+    <span class="kw">return</span> <span class="fn">sum</span>(<span class="fn">range</span>(<span class="var">n</span>))
+
+<span class="cm"># Decorator com parâmetros</span>
+<span class="kw">def</span> <span class="fn">repetir</span>(<span class="var">vezes</span>):
+    <span class="kw">def</span> <span class="fn">decorator</span>(<span class="var">func</span>):
+        <span class="kw">@</span><span class="fn">wraps</span>(<span class="var">func</span>)
+        <span class="kw">def</span> <span class="fn">wrapper</span>(*<span class="var">args</span>, **<span class="var">kwargs</span>):
+            <span class="kw">for</span> <span class="var">_</span> <span class="kw">in</span> <span class="fn">range</span>(<span class="var">vezes</span>):
+                <span class="var">resultado</span> = <span class="var">func</span>(*<span class="var">args</span>, **<span class="var">kwargs</span>)
+            <span class="kw">return</span> <span class="var">resultado</span>
+        <span class="kw">return</span> <span class="fn">wrapper</span>
+    <span class="kw">return</span> <span class="fn">decorator</span>
+
+<span class="kw">@</span><span class="fn">repetir</span>(<span class="num">3</span>)
+<span class="kw">def</span> <span class="fn">saudacao</span>():
+    <span class="fn">print</span>(<span class="str">"Sistema Iniciado"</span>)</pre></div>`
+  },
+  // MOD 10 - Módulos
+  {
+    mod: "MOD_10", title: "datetime e os",
+    difficulty: "INTERMEDIÁRIO", time: "18 MIN",
+    content: `
+      <p class="lesson-text">A biblioteca padrão do Python é vasta. <strong>datetime</strong> e <strong>os</strong> são dos mais usados no dia a dia.</p>
+      <div class="code-block"><div class="code-header"><span class="code-lang">PYTHON</span><button class="code-copy" onclick="copyCode(this)">COPIAR</button></div><pre><span class="kw">from</span> datetime <span class="kw">import</span> datetime, date, timedelta
+<span class="kw">import</span> os
+
+<span class="cm"># datetime</span>
+<span class="var">agora</span> = datetime.<span class="fn">now</span>()
+<span class="fn">print</span>(<span class="var">agora</span>.<span class="fn">strftime</span>(<span class="str">"%Y-%m-%d %H:%M:%S"</span>))
+
+<span class="var">futuro</span> = <span class="var">agora</span> + timedelta(days=<span class="num">365</span>, hours=<span class="num">6</span>)
+<span class="var">diferenca</span> = <span class="var">futuro</span> - <span class="var">agora</span>  <span class="cm"># timedelta</span>
+<span class="fn">print</span>(<span class="var">diferenca</span>.days)
+
+<span class="cm"># Parse de string para datetime</span>
+<span class="var">data</span> = datetime.<span class="fn">strptime</span>(<span class="str">"2049-11-01"</span>, <span class="str">"%Y-%m-%d"</span>)
+
+<span class="cm"># os — sistema operacional</span>
+<span class="fn">print</span>(os.<span class="fn">getcwd</span>())              <span class="cm"># diretório atual</span>
+<span class="fn">print</span>(os.path.<span class="fn">exists</span>(<span class="str">"arq.txt"</span>)) <span class="cm"># existe?</span>
+<span class.<span class="fn">fn">mkdir</span>(os, <span class="str">"nova_pasta"</span>, exist_ok=<span class="kw">True</span>)
+
+<span class="var">arquivos</span> = os.<span class="fn">listdir</span>(<span class="str">"."</span>)
+<span class="var">tam</span> = os.path.<span class="fn">getsize</span>(<span class="str">"arquivo.txt"</span>)
+
+<span class="cm"># Variáveis de ambiente</span>
+<span class="var">api_key</span> = os.environ.<span class="fn">get</span>(<span class="str">"API_KEY"</span>, <span class="str">"default"</span>)
+os.environ[<span class="str">"DEBUG"</span>] = <span class="str">"true"</span></pre></div>`
+  },
+  {
+    mod: "MOD_10", title: "random, math e itertools",
+    difficulty: "BÁSICO", time: "15 MIN",
+    content: `
+      <p class="lesson-text">Módulos utilitários que tornam tarefas comuns muito mais simples.</p>
+      <div class="code-block"><div class="code-header"><span class="code-lang">PYTHON</span><button class="code-copy" onclick="copyCode(this)">COPIAR</button></div><pre><span class="kw">import</span> random
+<span class="kw">import</span> math
+<span class="kw">from</span> itertools <span class="kw">import</span> combinations, permutations, chain
+
+<span class="cm"># random</span>
+<span class="fn">print</span>(random.<span class="fn">randint</span>(<span class="num">1</span>, <span class="num">100</span>))    <span class="cm"># int entre 1 e 100</span>
+<span class="fn">print</span>(random.<span class="fn">random</span>())           <span class="cm"># float [0.0, 1.0)</span>
+<span class="fn">print</span>(random.<span class="fn">choice</span>([<span class="str">"Roy"</span>, <span class="str">"Pris"</span>]))
+random.<span class="fn">shuffle</span>([<span class="num">1</span>,<span class="num">2</span>,<span class="num">3</span>,<span class="num">4</span>])        <span class="cm"># embaralha in-place</span>
+<span class="fn">print</span>(random.<span class="fn">sample</span>(<span class="fn">range</span>(<span class="num">100</span>), <span class="num">5</span>)) <span class="cm"># 5 únicos</span>
+
+<span class="cm"># math</span>
+<span class="fn">print</span>(math.<span class="fn">sqrt</span>(<span class="num">144</span>))      <span class="cm"># 12.0</span>
+<span class="fn">print</span>(math.<span class="fn">ceil</span>(<span class="num">4.2</span>))      <span class="cm"># 5</span>
+<span class="fn">print</span>(math.<span class="fn">floor</span>(<span class="num">4.9</span>))     <span class="cm"># 4</span>
+<span class="fn">print</span>(math.<span class="fn">log</span>(<span class="num">100</span>, <span class="num">10</span>))   <span class="cm"># 2.0</span>
+<span class="fn">print</span>(math.<span class="var">pi</span>, math.<span class="var">e</span>)    <span class="cm"># 3.14..., 2.71...</span>
+
+<span class="cm"># itertools</span>
+<span class="var">combos</span> = <span class="fn">list</span>(<span class="fn">combinations</span>([<span class="str">"A"</span>,<span class="str">"B"</span>,<span class="str">"C"</span>], <span class="num">2</span>))
+<span class="cm"># [('A','B'), ('A','C'), ('B','C')]</span>
+
+<span class="var">unidos</span> = <span class="fn">list</span>(<span class="fn">chain</span>([<span class="num">1</span>,<span class="num">2</span>], [<span class="num">3</span>,<span class="num">4</span>], [<span class="num">5</span>]))
+<span class="cm"># [1, 2, 3, 4, 5]</span></pre></div>`
+  },
+  // MOD 11 - Async
+  {
+    mod: "MOD_11", title: "async e await",
+    difficulty: "AVANÇADO", time: "25 MIN",
+    content: `
+      <p class="lesson-text"><strong>asyncio</strong> permite código assíncrono em Python — ideal para I/O (APIs, banco de dados, arquivos) sem bloquear a execução.</p>
+      <div class="code-block"><div class="code-header"><span class="code-lang">PYTHON</span><button class="code-copy" onclick="copyCode(this)">COPIAR</button></div><pre><span class="kw">import</span> asyncio
+
+<span class="cm"># Corrotina básica</span>
+<span class="kw">async def</span> <span class="fn">buscar_dado</span>(<span class="var">id</span>):
+    <span class="fn">print</span>(<span class="fn">f</span><span class="str">"Buscando {id}..."</span>)
+    <span class="kw">await</span> asyncio.<span class="fn">sleep</span>(<span class="num">1</span>)  <span class="cm"># simula I/O</span>
+    <span class="kw">return</span> <span class="fn">f</span><span class="str">"Dado_{id}"</span>
+
+<span class="cm"># Executar várias corrotinas em paralelo</span>
+<span class="kw">async def</span> <span class="fn">main</span>():
+    <span class="cm"># gather — roda todas simultâneas</span>
+    <span class="var">resultados</span> = <span class="kw">await</span> asyncio.<span class="fn">gather</span>(
+        <span class="fn">buscar_dado</span>(<span class="num">1</span>),
+        <span class="fn">buscar_dado</span>(<span class="num">2</span>),
+        <span class="fn">buscar_dado</span>(<span class="num">3</span>)
+    )
+    <span class="fn">print</span>(<span class="var">resultados</span>)
+    <span class="cm"># ~1s total (não 3s!)</span>
+
+asyncio.<span class="fn">run</span>(<span class="fn">main</span>())
+
+<span class="cm"># Timeout</span>
+<span class="kw">async def</span> <span class="fn">com_timeout</span>():
+    <span class="kw">try</span>:
+        <span class="var">res</span> = <span class="kw">await</span> asyncio.<span class="fn">wait_for</span>(
+            <span class="fn">buscar_dado</span>(<span class="str">"x"</span>), 
+            timeout=<span class="num">0.5</span>
+        )
+    <span class="kw">except</span> asyncio.<span class="cls">TimeoutError</span>:
+        <span class="fn">print</span>(<span class="str">"Timeout!"</span>)</pre></div>`
+  },
+  {
+    mod: "MOD_11", title: "Threading",
+    difficulty: "AVANÇADO", time: "20 MIN",
+    content: `
+      <p class="lesson-text"><strong>threading</strong> para tarefas I/O paralelas. <strong>multiprocessing</strong> para tarefas CPU-intensivas (evita o GIL).</p>
+      <div class="code-block"><div class="code-header"><span class="code-lang">PYTHON</span><button class="code-copy" onclick="copyCode(this)">COPIAR</button></div><pre><span class="kw">import</span> threading
+<span class="kw">from</span> concurrent.futures <span class="kw">import</span> ThreadPoolExecutor, as_completed
+
+<span class="cm"># Thread básica</span>
+<span class="kw">def</span> <span class="fn">tarefa</span>(<span class="var">nome</span>):
+    <span class="fn">print</span>(<span class="fn">f</span><span class="str">"Iniciando {nome}"</span>)
+
+<span class="var">t</span> = threading.<span class="cls">Thread</span>(target=<span class="fn">tarefa</span>, args=(<span class="str">"T1"</span>,))
+<span class="var">t</span>.<span class="fn">start</span>()
+<span class="var">t</span>.<span class="fn">join</span>()  <span class="cm"># aguarda conclusão</span>
+
+<span class="cm"># ThreadPoolExecutor — mais elegante</span>
+<span class="kw">def</span> <span class="fn">processar</span>(<span class="var">n</span>):
+    <span class="kw">return</span> <span class="var">n</span> ** <span class="num">2</span>
+
+<span class="kw">with</span> <span class="cls">ThreadPoolExecutor</span>(max_workers=<span class="num">4</span>) <span class="kw">as</span> <span class="var">executor</span>:
+    <span class="var">futures</span> = [<span class="var">executor</span>.<span class="fn">submit</span>(<span class="fn">processar</span>, <span class="var">i</span>) <span class="kw">for</span> <span class="var">i</span> <span class="kw">in</span> <span class="fn">range</span>(<span class="num">10</span>)]
+    
+    <span class="kw">for</span> <span class="var">future</span> <span class="kw">in</span> <span class="fn">as_completed</span>(<span class="var">futures</span>):
+        <span class="fn">print</span>(<span class="var">future</span>.<span class="fn">result</span>())
+
+<span class="cm"># Lock para evitar race conditions</span>
+<span class="var">lock</span> = threading.<span class="cls">Lock</span>()
+<span class="var">contador</span> = <span class="num">0</span>
+
+<span class="kw">def</span> <span class="fn">incrementar</span>():
+    <span class="kw">global</span> <span class="var">contador</span>
+    <span class="kw">with</span> <span class="var">lock</span>:  <span class="cm"># seção crítica</span>
+        <span class="var">contador</span> += <span class="num">1</span></pre></div>`
+  },
+  // MOD 12 - Projetos
+  {
+    mod: "MOD_12", title: "Consumindo APIs REST",
+    difficulty: "APLICADO", time: "25 MIN",
+    content: `
+      <p class="lesson-text">APIs REST são a espinha dorsal da web moderna. Use a biblioteca <strong>requests</strong> para fazer chamadas HTTP.</p>
+      <div class="code-block"><div class="code-header"><span class="code-lang">PYTHON</span><button class="code-copy" onclick="copyCode(this)">COPIAR</button></div><pre><span class="kw">import</span> requests
+
+<span class="cm"># GET básico</span>
+<span class="var">resp</span> = requests.<span class="fn">get</span>(<span class="str">"https://api.github.com/users/python"</span>)
+<span class="fn">print</span>(<span class="var">resp</span>.<span class="var">status_code</span>)  <span class="cm"># 200</span>
+<span class="var">dados</span> = <span class="var">resp</span>.<span class="fn">json</span>()
+
+<span class="cm"># GET com parâmetros</span>
+<span class="var">params</span> = {<span class="str">"q"</span>: <span class="str">"python"</span>, <span class="str">"sort"</span>: <span class="str">"stars"</span>}
+<span class="var">headers</span> = {<span class="str">"Authorization"</span>: <span class="str">"Bearer TOKEN"</span>}
+<span class="var">resp</span> = requests.<span class="fn">get</span>(<span class="str">"https://api.github.com/search/repositories"</span>,
+                    params=<span class="var">params</span>, headers=<span class="var">headers</span>)
+
+<span class="cm"># POST com JSON</span>
+<span class="var">payload</span> = {<span class="str">"nome"</span>: <span class="str">"Roy Batty"</span>, <span class="str">"nivel"</span>: <span class="str">"A"</span>}
+<span class="var">resp</span> = requests.<span class="fn">post</span>(<span class="str">"https://api.exemplo.com/replicantes"</span>,
+                     json=<span class="var">payload</span>, headers=<span class="var">headers</span>)
+
+<span class="cm"># Tratamento robusto</span>
+<span class="kw">def</span> <span class="fn">get_json</span>(<span class="var">url</span>, **<span class="var">kwargs</span>):
+    <span class="kw">try</span>:
+        <span class="var">resp</span> = requests.<span class="fn">get</span>(<span class="var">url</span>, timeout=<span class="num">10</span>, **<span class="var">kwargs</span>)
+        <span class="var">resp</span>.<span class="fn">raise_for_status</span>()  <span class="cm"># lança erro se 4xx/5xx</span>
+        <span class="kw">return</span> <span class="var">resp</span>.<span class="fn">json</span>()
+    <span class="kw">except</span> requests.<span class="cls">Timeout</span>:
+        <span class="fn">print</span>(<span class="str">"Timeout na requisição"</span>)
+    <span class="kw">except</span> requests.<span class="cls">HTTPError</span> <span class="kw">as</span> <span class="var">e</span>:
+        <span class="fn">print</span>(<span class="fn">f</span><span class="str">"HTTP Error: {e}"</span>)</pre></div>`
+  },
+  {
+    mod: "MOD_12", title: "Web Scraping com BeautifulSoup",
+    difficulty: "APLICADO", time: "22 MIN",
+    content: `
+      <p class="lesson-text"><strong>BeautifulSoup</strong> + <strong>requests</strong> formam um duo poderoso para extrair dados de páginas web.</p>
+      <div class="code-block"><div class="code-header"><span class="code-lang">PYTHON</span><button class="code-copy" onclick="copyCode(this)">COPIAR</button></div><pre><span class="kw">import</span> requests
+<span class="kw">from</span> bs4 <span class="kw">import</span> BeautifulSoup
+
+<span class="var">url</span> = <span class="str">"https://exemplo.com"</span>
+<span class="var">resp</span> = requests.<span class="fn">get</span>(<span class="var">url</span>)
+<span class="var">soup</span> = <span class="cls">BeautifulSoup</span>(<span class="var">resp</span>.text, <span class="str">"html.parser"</span>)
+
+<span class="cm"># Seleção de elementos</span>
+<span class="var">titulo</span> = <span class="var">soup</span>.<span class="fn">find</span>(<span class="str">"h1"</span>).<span class="var">text</span>
+<span class="var">links</span> = <span class="var">soup</span>.<span class="fn">find_all</span>(<span class="str">"a"</span>, href=<span class="kw">True</span>)
+<span class="var">tabela</span> = <span class="var">soup</span>.<span class="fn">select</span>(<span class="str">"table.dados tr"</span>)
+
+<span class="cm"># CSS selectors (como jQuery)</span>
+<span class="var">primeiro_p</span> = <span class="var">soup</span>.<span class="fn">select_one</span>(<span class="str">"article p:first-child"</span>)
+<span class="var">classe</span> = <span class="var">soup</span>.<span class="fn">find</span>(<span class="str">"div"</span>, class_=<span class="str">"destaque"</span>)
+
+<span class="cm"># Extrair atributos</span>
+<span class="kw">for</span> <span class="var">link</span> <span class="kw">in</span> <span class="var">links</span>[:5]:
+    <span class="fn">print</span>(<span class="var">link</span>[<span class="str">"href"</span>], <span class="var">link</span>.<span class="var">text</span>.<span class="fn">strip</span>())
+
+<span class="cm"># Extrair tabela para lista de dicts</span>
+<span class="var">dados</span> = []
+<span class="var">cabecalhos</span> = [<span class="var">th</span>.<span class="var">text</span>.<span class="fn">strip</span>() <span class="kw">for</span> <span class="var">th</span> <span class="kw">in</span> <span class="var">tabela</span>[<span class="num">0</span>].<span class="fn">find_all</span>(<span class="str">"th"</span>)]
+<span class="kw">for</span> <span class="var">linha</span> <span class="kw">in</span> <span class="var">tabela</span>[<span class="num">1</span>:]:
+    <span class="var">celulas</span> = [<span class="var">td</span>.<span class="var">text</span> <span class="kw">for</span> <span class="var">td</span> <span class="kw">in</span> <span class="var">linha</span>.<span class="fn">find_all</span>(<span class="str">"td"</span>)]
+    <span class="var">dados</span>.<span class="fn">append</span>(<span class="fn">dict</span>(<span class="fn">zip</span>(<span class="var">cabecalhos</span>, <span class="var">celulas</span>)))</pre></div>`
+  },
+  {
+    mod: "MOD_12", title: "Projeto Final: CLI Tool",
+    difficulty: "APLICADO", time: "30 MIN",
+    content: `
+      <p class="lesson-text">Construa uma ferramenta de linha de comando completa com <strong>argparse</strong> — integrando tudo que aprendeu.</p>
+      <div class="code-block"><div class="code-header"><span class="code-lang">PYTHON</span><button class="code-copy" onclick="copyCode(this)">COPIAR</button></div><pre><span class="cm">#!/usr/bin/env python3</span>
+<span class="str">"""Gerenciador de replicantes — CLI Tool"""</span>
+
+<span class="kw">import</span> argparse
+<span class="kw">import</span> json
+<span class="kw">from</span> pathlib <span class="kw">import</span> Path
+
+<span class="var">DB_PATH</span> = <span class="cls">Path</span>(<span class="str">"replicantes.json"</span>)
+
+<span class="kw">def</span> <span class="fn">carregar_db</span>():
+    <span class="kw">if</span> <span class="var">DB_PATH</span>.<span class="fn">exists</span>():
+        <span class="kw">return</span> json.<span class="fn">loads</span>(<span class="var">DB_PATH</span>.<span class="fn">read_text</span>())
+    <span class="kw">return</span> []
+
+<span class="kw">def</span> <span class="fn">salvar_db</span>(<span class="var">dados</span>):
+    <span class="var">DB_PATH</span>.<span class="fn">write_text</span>(json.<span class="fn">dumps</span>(<span class="var">dados</span>, indent=<span class="num">2</span>))
+
+<span class="kw">def</span> <span class="fn">adicionar</span>(<span class="var">args</span>):
+    <span class="var">db</span> = <span class="fn">carregar_db</span>()
+    <span class="var">db</span>.<span class="fn">append</span>({<span class="str">"nome"</span>: <span class="var">args</span>.nome, <span class="str">"nivel"</span>: <span class="var">args</span>.nivel})
+    <span class="fn">salvar_db</span>(<span class="var">db</span>)
+    <span class="fn">print</span>(<span class="fn">f</span><span class="str">"✓ Replicante {args.nome} registrado"</span>)
+
+<span class="kw">def</span> <span class="fn">listar</span>(<span class="var">args</span>):
+    <span class="kw">for</span> <span class="var">r</span> <span class="kw">in</span> <span class="fn">carregar_db</span>():
+        <span class="fn">print</span>(<span class="fn">f</span><span class="str">"• {r['nome']} [{r['nivel']}]"</span>)
+
+<span class="kw">def</span> <span class="fn">main</span>():
+    <span class="var">parser</span> = argparse.<span class="cls">ArgumentParser</span>(description=<span class="str">"Gerenciador"</span>)
+    <span class="var">sub</span> = <span class="var">parser</span>.<span class="fn">add_subparsers</span>(dest=<span class="str">"cmd"</span>)
+    
+    <span class="cm"># Subcomando: adicionar</span>
+    <span class="var">add_p</span> = <span class="var">sub</span>.<span class="fn">add_parser</span>(<span class="str">"add"</span>)
+    <span class="var">add_p</span>.<span class="fn">add_argument</span>(<span class="str">"nome"</span>)
+    <span class="var">add_p</span>.<span class="fn">add_argument</span>(<span class="str">"--nivel"</span>, default=<span class="str">"B"</span>)
+    <span class="var">add_p</span>.<span class="fn">set_defaults</span>(func=<span class="fn">adicionar</span>)
+    
+    <span class="cm"># Subcomando: listar</span>
+    <span class="var">ls_p</span> = <span class="var">sub</span>.<span class="fn">add_parser</span>(<span class="str">"list"</span>)
+    <span class="var">ls_p</span>.<span class="fn">set_defaults</span>(func=<span class="fn">listar</span>)
+    
+    <span class="var">args</span> = <span class="var">parser</span>.<span class="fn">parse_args</span>()
+    <span class="kw">if</span> <span class="fn">hasattr</span>(<span class="var">args</span>, <span class="str">"func"</span>):
+        <span class="var">args</span>.<span class="fn">func</span>(<span class="var">args</span>)
+
+<span class="kw">if</span> __name__ == <span class="str">"__main__"</span>:
+    <span class="fn">main</span>()
+<span class="cm"># Uso: python tool.py add "Roy" --nivel A
+# Uso: python tool.py list</span></pre></div>`
+  }
+];
+
+// ============ BUILD SIDEBAR ============
+function buildSidebar() {
+  const sidebar = document.getElementById('sidebar');
+  let currentMod = '';
+  let html = '';
+
+  lessons.forEach((lesson, i) => {
+    if (lesson.mod !== currentMod) {
+      currentMod = lesson.mod;
+      html += `<div class="sidebar-section-title">${currentMod}</div>`;
+    }
+    html += `<div class="sidebar-item ${i===0?'active':''}" onclick="goToLesson(${i})" id="sidebar-${i}">
+      <span class="sidebar-num">${String(i+1).padStart(2,'0')}</span>
+      ${lesson.title}
+    </div>`;
+  });
+  sidebar.innerHTML = html;
+}
+
+// ============ RENDER LESSON ============
+let currentLesson = 0;
+
+function goToLesson(idx) {
+  if (idx < 0 || idx >= lessons.length) return;
+  currentLesson = idx;
+
+  document.querySelectorAll('.sidebar-item').forEach((el, i) => {
+    el.classList.toggle('active', i === idx);
+  });
+
+  const sidebar = document.getElementById(`sidebar-${idx}`);
+  if (sidebar) sidebar.scrollIntoView({ block: 'nearest' });
+
+  const lesson = lessons[idx];
+  const display = document.getElementById('lesson-display');
+
+  const diffColors = { 'BÁSICO': '#00ff41', 'INTERMEDIÁRIO': '#ffd700', 'AVANÇADO': '#ff0090', 'APLICADO': '#00f5ff' };
+  const dc = diffColors[lesson.difficulty] || '#00f5ff';
+
+  display.innerHTML = `
+    <div class="lesson-title">${lesson.title}</div>
+    <div class="lesson-meta">
+      <span>${lesson.mod}</span>
+      <span style="color:${dc}">${lesson.difficulty}</span>
+      <span>⏱ ${lesson.time}</span>
+      <span>${idx+1}/${lessons.length}</span>
+    </div>
+    <div class="lesson-content active">
+      ${lesson.content}
+    </div>
+    <div class="lesson-nav">
+      <button class="nav-btn" onclick="goToLesson(${idx-1})" ${idx===0?'disabled':''}>◄ ANTERIOR</button>
+      <div style="font-family:'Share Tech Mono',monospace;font-size:10px;color:var(--text-dim);align-self:center">
+        ${idx+1} / ${lessons.length}
+        <div class="progress-track" style="width:200px;margin-top:4px">
+          <div class="progress-fill" style="width:${((idx+1)/lessons.length*100).toFixed(1)}%"></div>
+        </div>
+      </div>
+      <button class="nav-btn" onclick="goToLesson(${idx+1})" ${idx===lessons.length-1?'disabled':''}>PRÓXIMO ►</button>
+    </div>
+  `;
+
+  // Scroll to aulas on mobile
+  if (window.innerWidth < 768) {
+    document.getElementById('aulas').scrollIntoView({ behavior: 'smooth' });
+  }
+}
+
+function copyCode(btn) {
+  const pre = btn.closest('.code-block').querySelector('pre');
+  const text = pre.innerText;
+  navigator.clipboard.writeText(text).then(() => {
+    btn.textContent = 'COPIADO!';
+    btn.style.color = 'var(--green)';
+    setTimeout(() => { btn.textContent = 'COPIAR'; btn.style.color = ''; }, 2000);
+  });
+}
+
+// ============ INIT ============
+buildSidebar();
+goToLesson(0);
+
+// Terminal typing effect in hero
+(function typeEffect() {
+  const tag = document.querySelector('.hero-tag');
+  if (!tag) return;
+  const text = tag.textContent;
+  tag.textContent = '';
+  tag.style.opacity = 1;
+  let i = 0;
+  const t = setInterval(() => {
+    tag.textContent += text[i++];
+    if (i >= text.length) clearInterval(t);
+  }, 40);
+})();
+
+// Random glitch flickers
+setInterval(() => {
+  const cards = document.querySelectorAll('.module-card');
+  const card = cards[Math.floor(Math.random() * cards.length)];
+  if (card) {
+    card.style.borderColor = 'var(--magenta)';
+    setTimeout(() => card.style.borderColor = '', 100);
+  }
+}, 3000);
+
+</script>
+</body>
+</html>
